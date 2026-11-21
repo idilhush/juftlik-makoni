@@ -1,0 +1,3099 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Juftlik Makoni 🩵</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(180deg, #E0F2FE 0%, #F0F9FF 28%, #FFFFFF 65%, #F8FAFC 100%);
+      color: #0F172A;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: none;
+      overflow-x: hidden;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(186, 230, 253, 0.78);
+      box-shadow: 0 10px 30px -10px rgba(14, 165, 233, 0.13);
+    }
+    .sky-glass {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-color: rgba(186, 230, 253, 0.85);
+    }
+    .sky-gradient {
+      background: linear-gradient(135deg, #38BDF8 0%, #0EA5E9 55%, #0284C7 100%);
+    }
+    .sky-soft {
+      background: linear-gradient(135deg, #E0F2FE 0%, #F0F9FF 100%);
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes floatSoft {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    .animate-float { animation: floatSoft 3.2s ease-in-out infinite; }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.55); }
+      50% { box-shadow: 0 0 0 11px rgba(56, 189, 248, 0); }
+    }
+    .pulse-ring { animation: pulseGlow 2.4s infinite; }
+    @keyframes riseHeart {
+      0% { opacity: 1; transform: translateY(0) scale(0.8); }
+      100% { opacity: 0; transform: translateY(-115px) scale(1.35); }
+    }
+    .floating-heart {
+      position: fixed;
+      pointer-events: none;
+      z-index: 160;
+      font-size: 22px;
+      animation: riseHeart 1.3s ease-out forwards;
+    }
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .tab-enter { animation: fadeSlide 0.22s ease-out forwards; }
+  </style>
+</head>
+<body class="min-h-screen pb-28 select-none">
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-[150] hidden items-center gap-2.5 px-4 py-3 rounded-2xl bg-slate-900/95 text-white text-xs font-semibold shadow-2xl border border-sky-400/30 max-w-[92vw] text-center">
+    <span id="toastIcon" class="shrink-0">🩵</span>
+    <span id="toastText" class="leading-snug">Xabar</span>
+  </div>
+
+  <!-- ==================== 1. AUTH SCREEN ==================== -->
+  <section id="authScreen" class="min-h-screen flex flex-col justify-center px-5 py-7 max-w-md mx-auto">
+    <div class="flex justify-end mb-3">
+      <div class="inline-flex bg-white/90 border border-sky-200 rounded-full p-0.5 shadow-sm">
+        <button type="button" onclick="setLanguage('uz')" data-lang-pill="uz" class="px-2.5 py-1 rounded-full text-[11px] font-extrabold transition">UZ</button>
+        <button type="button" onclick="setLanguage('ru')" data-lang-pill="ru" class="px-2.5 py-1 rounded-full text-[11px] font-extrabold transition">RU</button>
+        <button type="button" onclick="setLanguage('en')" data-lang-pill="en" class="px-2.5 py-1 rounded-full text-[11px] font-extrabold transition">EN</button>
+      </div>
+    </div>
+
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 mx-auto rounded-3xl sky-gradient flex items-center justify-center text-white text-3xl shadow-lg shadow-sky-200 animate-float mb-3">🩵</div>
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight" data-i18n="appTitle">Juftlik Makoni</h1>
+      <p class="text-xs text-slate-500 mt-1" data-i18n="appSubtitle">Ikki qalb uchun yagona oq va havorang raqamli olam</p>
+    </div>
+
+    <div class="glass-card rounded-3xl p-5 shadow-xl">
+      <div class="grid grid-cols-2 gap-1.5 bg-sky-50/90 p-1 rounded-2xl mb-5 border border-sky-100">
+        <button type="button" id="tabLoginBtn" onclick="switchAuthTab('login')" class="py-2.5 rounded-xl text-xs font-bold transition bg-white text-sky-600 shadow-sm" data-i18n="loginTab">Kirish</button>
+        <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')" class="py-2.5 rounded-xl text-xs font-bold transition text-slate-500" data-i18n="registerTab">Ro‘yxatdan o‘tish</button>
+      </div>
+
+      <!-- LOGIN -->
+      <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1" data-i18n="loginLabel">Login yoki Email</label>
+          <input id="loginUsername" type="text" required data-i18n-ph="phLoginIdent" placeholder="Loginingiz yoki email..." class="w-full px-3.5 py-3 rounded-xl bg-sky-50/60 border border-sky-100 text-sm focus:outline-none focus:border-sky-400 focus:bg-white transition" />
+        </div>
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="block text-[11px] font-bold text-slate-600" data-i18n="passwordLabel">Parol</label>
+            <button type="button" onclick="switchAuthTab('forgot')" class="text-[11px] font-semibold text-sky-600 hover:underline" data-i18n="forgotLink">Parolni unutdingizmi?</button>
+          </div>
+          <input id="loginPassword" type="password" required placeholder="••••••••" class="w-full px-3.5 py-3 rounded-xl bg-sky-50/60 border border-sky-100 text-sm focus:outline-none focus:border-sky-400 focus:bg-white transition" />
+        </div>
+        <button id="loginSubmitBtn" type="submit" class="w-full py-3.5 rounded-2xl sky-gradient text-white font-bold text-sm shadow-md shadow-sky-200 active:scale-[0.98] transition mt-2" data-i18n="loginBtn">Kirish 🩵</button>
+      </form>
+
+      <!-- REGISTER -->
+      <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-3 hidden">
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1" data-i18n="firstName">Ismingiz</label>
+            <input id="regFirstName" type="text" required data-i18n-ph="firstName" class="w-full px-3 py-2.5 rounded-xl bg-sky-50/60 border border-sky-100 text-sm focus:outline-none focus:border-sky-400 focus:bg-white" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1" data-i18n="lastName">Familiyangiz</label>
+            <input id="regLastName" type="text" required data-i18n-ph="lastName" class="w-full px-3 py-2.5 rounded-xl bg-sky-50/60 border border-sky-100 text-sm focus:outline-none focus:border-sky-400 focus:bg-white" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1" data-i18n="emailLabel">Elektron pochta</label>
+          <div class="flex gap-2">
+            <input id="regEmail" type="email" required placeholder="example@gmail.com" class="flex-1 px-3 py-2.5 rounded-xl bg-sky-50/60 border border-sky-100 text-sm focus:outline-none focus:border-sky-400 focus:bg-white" />
+            <button type="button" id="sendRegCodeBtn" onclick="sendVerificationCode('register')" class="px-3.5 py-2.5 rounded-xl bg-sky-100 text-sky-700 font-bold text-xs hover:bg-sky-200 transition whitespace-nowrap" data-i18n="getCode">Kod olish</button>
+          </div>
+        </div>
+
+        <div id="regCodeWrapper" class="hidden bg-sky-50 border border-sky-200 rounded-2xl p-3 space-y-1.5">
+          <label class="block text-[11px] font-bold text-sky-700 text-center" data-i18n="enterCode">Pochtaga kelgan 6 xonali kod</label>
+          <input id="regEmailCode" type="text" maxlength="6" inputmode="numeric" placeholder="000000" class="w-full px-3.5 py-2 rounded-xl bg-white border border-sky-300 text-base font-extrabold tracking-[0.35em] text-center focus:outline-none" />
+          <p class="text-[10px] text-slate-500 text-center" data-i18n="otpHintText">Kod 10 daqiqa amal qiladi. Spam jildini ham tekshiring.</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Login</label>
+            <input id="regUsername" type="text" required placeholder="login" class="w-full px-3 py-2.5 rounded-xl bg-sky-50/60 border border-sky-100 text-sm focus:outline-none focus:border-sky-400 focus:bg-white" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1" data-i18n="passwordLabel">Parol</label>
+            <input id="regPassword" type="password" required placeholder="••••••" class="w-full px-3 py-2.5 rounded-xl bg-sky-50/60 border border-sky-100 text-sm focus:outline-none focus:border-sky-400 focus:bg-white" />
+          </div>
+        </div>
+
+        <button id="regSubmitBtn" type="submit" class="w-full py-3.5 rounded-2xl sky-gradient text-white font-bold text-sm shadow-md shadow-sky-200 active:scale-[0.98] transition mt-2" data-i18n="createAccount">Profil yaratish ✨</button>
+      </form>
+
+      <!-- FORGOT PASSWORD -->
+      <form id="forgotForm" onsubmit="handleResetPassword(event)" class="space-y-3.5 hidden">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-extrabold text-slate-800" data-i18n="recoverTitle">Parolni tiklash 🔑</h3>
+          <button type="button" onclick="switchAuthTab('login')" class="text-xs font-semibold text-slate-400 hover:text-slate-600" data-i18n="btnBack">← Orqaga</button>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1" data-i18n="emailLabel">Elektron pochta</label>
+          <div class="flex gap-2">
+            <input id="forgotEmail" type="email" required placeholder="example@gmail.com" class="flex-1 px-3 py-2.5 rounded-xl bg-sky-50/60 border border-sky-100 text-sm focus:outline-none focus:border-sky-400" />
+            <button type="button" id="sendForgotCodeBtn" onclick="sendVerificationCode('forgot')" class="px-3.5 py-2.5 rounded-xl bg-sky-100 text-sky-700 font-bold text-xs hover:bg-sky-200 transition whitespace-nowrap" data-i18n="getCode">Kod olish</button>
+          </div>
+        </div>
+        <div id="forgotCodeWrapper" class="hidden space-y-3">
+          <div>
+            <label class="block text-[11px] font-bold text-sky-700 mb-1" data-i18n="enterCode">6 xonali kod</label>
+            <input id="forgotCodeInput" type="text" maxlength="6" inputmode="numeric" placeholder="000000" class="w-full px-3.5 py-2.5 rounded-xl bg-sky-50 border border-sky-200 text-sm font-bold tracking-widest text-center" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1" data-i18n="newPassLabel">Yangi parol</label>
+            <input id="forgotNewPassword" type="password" placeholder="••••••" class="w-full px-3.5 py-2.5 rounded-xl bg-sky-50/60 border border-sky-100 text-sm" />
+          </div>
+          <button type="submit" class="w-full py-3 rounded-2xl sky-gradient text-white font-bold text-sm shadow-md" data-i18n="btnUpdatePass">Parolni yangilash ✅</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ==================== 2. MAIN APP SHELL ==================== -->
+  <div id="mainApp" class="hidden max-w-md mx-auto">
+
+    <!-- SYSTEM ANNOUNCEMENT BANNER -->
+    <div id="systemAnnouncementBanner" class="hidden bg-slate-900 text-white px-4 py-2.5 text-xs flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2 min-w-0">
+        <span>📢</span>
+        <span id="announcementText" class="truncate font-semibold"></span>
+      </div>
+      <button type="button" onclick="dismissAnnouncement()" class="text-sky-300 hover:text-white text-xs font-bold shrink-0">✕</button>
+    </div>
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-30 sky-glass border-b border-sky-100 px-3.5 py-2.5 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-9 h-9 rounded-2xl sky-gradient flex items-center justify-center text-white text-base shadow-sm shrink-0">🩵</div>
+        <div class="min-w-0">
+          <h1 id="headerCoupleTitle" class="text-sm font-extrabold text-slate-900 truncate">Juftlik Makoni</h1>
+          <p id="headerSubtitle" class="text-[11px] text-sky-600 font-semibold truncate">Shaxsiy makon</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1.5 shrink-0">
+        <!-- Admin Shield (Visible ONLY to Super Admin & Admins) -->
+        <button type="button" id="adminHeaderBtn" onclick="openAdminDashboard()" class="hidden px-2.5 py-1.5 rounded-xl bg-slate-900 text-white text-[10px] font-extrabold shadow-sm flex items-center gap-1">
+          <span>🛡️</span>
+          <span>Admin</span>
+        </button>
+
+        <!-- Language Pills -->
+        <div class="inline-flex bg-sky-50 border border-sky-200 rounded-full p-0.5">
+          <button type="button" onclick="setLanguage('uz')" data-lang-pill="uz" class="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold transition">UZ</button>
+          <button type="button" onclick="setLanguage('ru')" data-lang-pill="ru" class="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold transition">RU</button>
+          <button type="button" onclick="setLanguage('en')" data-lang-pill="en" class="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold transition">EN</button>
+        </div>
+
+        <button type="button" onclick="openProfileModal()" class="px-2.5 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 text-xs font-bold border border-sky-200 transition">
+          ⚙️
+        </button>
+      </div>
+    </header>
+
+    <!-- PAIRING BANNER -->
+    <div id="pairingBanner" class="hidden mx-4 mt-4 p-4 rounded-3xl sky-soft border border-sky-200 shadow-sm space-y-2.5">
+      <div>
+        <span class="inline-block px-2.5 py-0.5 rounded-full bg-sky-500 text-white text-[10px] font-bold" data-i18n="notPairedBadge">Juftlik ulanmagan</span>
+        <h3 class="text-sm font-extrabold text-slate-900 mt-1" data-i18n="inviteTitle">Juftingizni makonga taklif qiling 🩵</h3>
+        <p class="text-[11px] text-slate-600 mt-0.5" data-i18n="inviteDesc">Shaxsiy kodingizni juftingizga yuboring yoki Profil orqali uning kodini ulang.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="flex-1 bg-white px-3.5 py-2.5 rounded-2xl border border-sky-200 flex items-center justify-between">
+          <span class="text-[11px] text-slate-400 font-semibold">Kod:</span>
+          <span id="bannerInviteCode" class="text-sm font-extrabold text-sky-600 tracking-wider">LOVE-0000</span>
+        </div>
+        <button type="button" onclick="copyInviteCode()" class="px-3.5 py-2.5 rounded-2xl sky-gradient text-white text-xs font-bold shadow-sm" data-i18n="copyBtn">Nusxalash</button>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 1: ASOSIY (HOME) ==================== -->
+    <main id="tab-home" class="px-4 pt-4 space-y-4 tab-enter">
+      <!-- Love Counter -->
+      <div class="rounded-3xl sky-gradient p-5 text-white shadow-lg shadow-sky-200/80 relative overflow-hidden">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-3 py-1 rounded-full bg-white/20 text-[11px] font-bold" data-i18n="togetherTime">Birga bo‘lgan vaqtimiz ✨</span>
+          <button type="button" onclick="openDateModal()" class="px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 text-[11px] font-bold" data-i18n="changeDate">Sanani o‘zgartirish</button>
+        </div>
+
+        <div class="grid grid-cols-4 gap-2 text-center">
+          <div class="bg-white/15 backdrop-blur-md rounded-2xl py-3 px-1 border border-white/20">
+            <div id="daysCount" class="text-2xl font-extrabold leading-none">0</div>
+            <div class="text-[10px] font-semibold uppercase mt-1.5 text-sky-100" data-i18n="days">Kun</div>
+          </div>
+          <div class="bg-white/15 backdrop-blur-md rounded-2xl py-3 px-1 border border-white/20">
+            <div id="hoursCount" class="text-2xl font-extrabold leading-none">0</div>
+            <div class="text-[10px] font-semibold uppercase mt-1.5 text-sky-100" data-i18n="hours">Soat</div>
+          </div>
+          <div class="bg-white/15 backdrop-blur-md rounded-2xl py-3 px-1 border border-white/20">
+            <div id="minutesCount" class="text-2xl font-extrabold leading-none">0</div>
+            <div class="text-[10px] font-semibold uppercase mt-1.5 text-sky-100" data-i18n="minutes">Daqiqa</div>
+          </div>
+          <div class="bg-white/15 backdrop-blur-md rounded-2xl py-3 px-1 border border-white/20">
+            <div id="secondsCount" class="text-2xl font-extrabold leading-none">0</div>
+            <div class="text-[10px] font-semibold uppercase mt-1.5 text-sky-100" data-i18n="seconds">Soniya</div>
+          </div>
+        </div>
+
+        <div class="mt-3 flex items-center justify-between text-[11px] text-sky-100">
+          <span id="startDateLabel">Boshlanish sanasi: belgilanmagan</span>
+          <span id="dateAuthorLabel" class="font-semibold"></span>
+        </div>
+      </div>
+
+      <!-- Enhanced Per-Partner Miss You Pulse -->
+      <div class="glass-card rounded-3xl p-4 space-y-3 bg-gradient-to-br from-white via-sky-50/40 to-cyan-50/40">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <h3 class="text-sm font-extrabold text-slate-900" data-i18n="missYouTitle">Mehr to‘lqini 💓</h3>
+            <p id="lastPulseSubtitle" class="text-[11px] text-slate-500 mt-0.5">Bir-biringizga mehr signali yuboring</p>
+          </div>
+          <button type="button" onclick="sendMissYouPulse(event)" class="px-4 py-2.5 rounded-2xl sky-gradient pulse-ring text-white text-xs font-extrabold shadow-md active:scale-95 transition shrink-0" data-i18n="btnMissYouSend">
+            Sog‘indim 🩵
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5 text-center">
+          <div class="bg-white border border-sky-100 rounded-2xl p-2.5">
+            <div id="pulseP1Name" class="text-[11px] font-bold text-sky-700 truncate">Siz</div>
+            <div id="pulseP1Stats" class="text-xs font-extrabold text-slate-800 mt-0.5">Bugun: 0 • Jami: 0</div>
+          </div>
+          <div class="bg-white border border-sky-100 rounded-2xl p-2.5">
+            <div id="pulseP2Name" class="text-[11px] font-bold text-cyan-700 truncate">Juftingiz</div>
+            <div id="pulseP2Stats" class="text-xs font-extrabold text-slate-800 mt-0.5">Bugun: 0 • Jami: 0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Mood -->
+      <div class="glass-card rounded-3xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-extrabold text-slate-900" data-i18n="liveMoodTitle">Jonli kayfiyatimiz 🌤</h2>
+          <span id="myActiveMoodBadge" class="px-2.5 py-1 rounded-full sky-gradient text-white text-[10px] font-bold">Yaxshi kayfiyatda 🩵</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="p-3 rounded-2xl bg-sky-50/80 border border-sky-100">
+            <div id="myMoodName" class="text-[11px] font-bold text-sky-700 mb-1 truncate">Siz</div>
+            <div id="myMoodValue" class="text-xs font-extrabold text-slate-800 break-words">Yaxshi kayfiyatda 🩵</div>
+          </div>
+          <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/70">
+            <div id="partnerMoodName" class="text-[11px] font-bold text-slate-500 mb-1 truncate">Juftingiz</div>
+            <div id="partnerMoodValue" class="text-xs font-semibold text-slate-400 break-words">Juftingiz kutilmoqda 🤍</div>
+          </div>
+        </div>
+
+        <div id="moodChipsContainer" class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1"></div>
+
+        <form onsubmit="submitCustomMood(event)" class="flex gap-2">
+          <input id="customMoodInput" type="text" maxlength="60" data-i18n-ph="phCustomMood" placeholder="O‘z kayfiyatingizni yozing..." class="flex-1 px-3.5 py-2 rounded-xl bg-sky-50/70 border border-sky-100 text-xs focus:outline-none focus:border-sky-400" />
+          <button type="submit" class="px-3.5 py-2 rounded-xl bg-sky-500 text-white text-xs font-bold shrink-0" data-i18n="btnUpdate">Yangilash</button>
+        </form>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-4 gap-2">
+        <button type="button" onclick="switchTab('gallery')" class="glass-card rounded-2xl p-3 text-center">
+          <div id="statPhotos" class="text-lg font-extrabold text-sky-600">0</div>
+          <div class="text-[10px] font-bold text-slate-500 mt-0.5" data-i18n="statMedia">Media</div>
+        </button>
+        <button type="button" onclick="switchTab('music')" class="glass-card rounded-2xl p-3 text-center">
+          <div id="statSongs" class="text-lg font-extrabold text-sky-600">0</div>
+          <div class="text-[10px] font-bold text-slate-500 mt-0.5" data-i18n="statSongs">Musiqa</div>
+        </button>
+        <button type="button" onclick="switchTab('distance')" class="glass-card rounded-2xl p-3 text-center">
+          <div id="statDistance" class="text-lg font-extrabold text-sky-600">—</div>
+          <div class="text-[10px] font-bold text-slate-500 mt-0.5" data-i18n="navDistance">Masofa</div>
+        </button>
+        <button type="button" onclick="switchTab('games')" class="glass-card rounded-2xl p-3 text-center">
+          <div id="statGames" class="text-lg font-extrabold text-sky-600">0</div>
+          <div class="text-[10px] font-bold text-slate-500 mt-0.5" data-i18n="statScores">Ball</div>
+        </button>
+      </div>
+
+      <!-- Important Dates & Countdown (NEW from alternative variant) -->
+      <div class="glass-card rounded-3xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-extrabold text-slate-900" data-i18n="specialDatesTitle">Muhim sanalar & Taymer 📅</h2>
+          <span class="text-[10px] font-semibold text-sky-600" data-i18n="specialDatesSub">Unutilmas kunlar</span>
+        </div>
+        <div class="space-y-2">
+          <input id="specialDateTitleInput" type="text" data-i18n-ph="phSpecialDateTitle" placeholder="Sana nomi (masalan: Tug‘ilgan kun, Uchrashuv)..." class="w-full px-3.5 py-2.5 rounded-xl bg-sky-50/70 border border-sky-100 text-xs focus:outline-none focus:border-sky-400" />
+          <div class="flex gap-2">
+            <input id="specialDateValueInput" type="date" class="flex-1 px-3 py-2.5 rounded-xl bg-sky-50/70 border border-sky-100 text-xs font-semibold text-slate-700 focus:outline-none focus:border-sky-400" />
+            <button type="button" onclick="addSpecialDate()" class="px-4 py-2.5 rounded-xl sky-gradient text-white text-xs font-bold shrink-0" data-i18n="btnAdd">+ Qo‘shish</button>
+          </div>
+        </div>
+        <div id="specialDatesContainer" class="space-y-2"></div>
+      </div>
+
+      <!-- Shared Wishlist / Ideas -->
+      <div class="glass-card rounded-3xl p-4 space-y-3">
+        <h2 class="text-sm font-extrabold text-slate-900" data-i18n="sharedPlansTitle">Birgalikdagi rejalar & g‘oyalar ✨</h2>
+        <form onsubmit="addIdea(event)" class="flex gap-2">
+          <input id="ideaInput" type="text" required data-i18n-ph="phNewPlan" placeholder="Yangi reja yozing..." class="flex-1 px-3.5 py-2.5 rounded-xl bg-sky-50/70 border border-sky-100 text-xs focus:outline-none focus:border-sky-400" />
+          <button type="submit" class="px-4 py-2.5 rounded-xl sky-gradient text-white text-xs font-bold shrink-0" data-i18n="btnAdd">+ Qo‘shish</button>
+        </form>
+        <div id="ideasList" class="space-y-2"></div>
+      </div>
+    </main>
+
+    <!-- ==================== TAB 2: GALEREYA ==================== -->
+    <main id="tab-gallery" class="hidden px-4 pt-4 space-y-4 tab-enter">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-extrabold text-slate-900" data-i18n="galleryTitle">Umumiy Galereya 🖼️</h2>
+          <p class="text-[11px] text-slate-500" data-i18n="gallerySub">Rasm va videolar (har birida muallif ko‘rinadi)</p>
+        </div>
+        <button type="button" onclick="openPhotoModal()" class="px-3.5 py-2 rounded-2xl sky-gradient text-white text-xs font-bold shadow-md" data-i18n="btnUploadMedia">+ Yuklash</button>
+      </div>
+      <div id="galleryFilterBar" class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1"></div>
+      <div id="galleryGrid" class="grid grid-cols-2 gap-3"></div>
+    </main>
+
+    <!-- ==================== TAB 3: MUSIQA ==================== -->
+    <main id="tab-music" class="hidden px-4 pt-4 space-y-4 tab-enter">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-extrabold text-slate-900" data-i18n="musicTitle">Musiqa & Playlistlar 🎧</h2>
+          <p class="text-[11px] text-slate-500" data-i18n="musicSub">Shaxsiy va umumiy playlistlar</p>
+        </div>
+        <button type="button" onclick="openMusicModal()" class="px-3.5 py-2 rounded-2xl sky-gradient text-white text-xs font-bold shadow-md" data-i18n="btnUploadSong">+ Qo‘shiq</button>
+      </div>
+      <div id="playlistTabs" class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1"></div>
+      <div id="songsList" class="space-y-2.5"></div>
+    </main>
+
+    <!-- ==================== TAB 4: SUHBAT & VAQT KAPSULASI ==================== -->
+    <main id="tab-chat" class="hidden px-4 pt-4 space-y-4 tab-enter">
+      <!-- Time Capsule Card (Expandable reader + countdown + delete) -->
+      <div class="glass-card rounded-3xl p-4 space-y-3 bg-gradient-to-br from-sky-50/70 via-white to-cyan-50/40 border-sky-200">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <span class="text-xs font-extrabold text-sky-700" data-i18n="capsuleTitle">⏳ Vaqt Kapsulasi (Kelajakka Xat)</span>
+            <p class="text-[11px] text-slate-500" data-i18n="capsuleSub">Belgilangan sanagacha yopiq turadigan maxfiy maktub</p>
+          </div>
+          <button type="button" onclick="toggleTimeCapsuleComposer()" class="px-3 py-1.5 rounded-xl sky-gradient text-white text-xs font-bold shrink-0" data-i18n="btnWriteCapsule">+ Xat yozish</button>
+        </div>
+
+        <div id="timeCapsuleComposerBox" class="hidden space-y-2.5 pt-2 border-t border-sky-100">
+          <input id="capsuleTitleInput" type="text" data-i18n-ph="phCapsuleTitle" placeholder="Maktub sarlavhasi (masalan: 1 yilligimizga)..." class="w-full px-3 py-2 rounded-xl bg-white border border-sky-200 text-xs focus:outline-none focus:border-sky-400" />
+          <textarea id="capsuleBodyInput" rows="3" data-i18n-ph="phCapsuleBody" placeholder="Kelajakda ochiladigan samimiy so‘zlaringiz..." class="w-full px-3 py-2 rounded-xl bg-white border border-sky-200 text-xs focus:outline-none focus:border-sky-400"></textarea>
+          <div class="flex items-end gap-2">
+            <div class="flex-1">
+              <label class="block text-[10px] font-bold text-slate-500 mb-0.5" data-i18n="labelUnlockDate">Qachon ochilsin?</label>
+              <input id="capsuleUnlockDateInput" type="date" class="w-full px-3 py-2 rounded-xl bg-white border border-sky-200 text-xs font-semibold" />
+            </div>
+            <button type="button" onclick="createTimeCapsule()" class="px-4 py-2.5 rounded-xl sky-gradient text-white text-xs font-bold shrink-0" data-i18n="btnSealCapsule">Muhrlash 🔒</button>
+          </div>
+        </div>
+
+        <div id="capsulesList" class="space-y-2"></div>
+      </div>
+
+      <!-- Daily Secret Question (+ Add Custom Question) -->
+      <div class="glass-card rounded-3xl p-4 border-sky-200 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-700 text-[10px] font-extrabold" data-i18n="secretQTitle">Kunlik Sirli Savol 🔐</span>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="openAddSecretQuestionModal()" class="text-[11px] font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded-lg" data-i18n="btnPlusQuestion">+ Savol</button>
+            <button type="button" onclick="nextSecretQuestion()" class="text-[11px] font-bold text-slate-500 hover:text-sky-600" data-i18n="btnNextArrow">Keyingi →</button>
+          </div>
+        </div>
+        <h3 id="secretQuestionText" class="text-sm font-extrabold text-slate-900 leading-snug"></h3>
+        <div id="secretAnswersArea" class="space-y-2"></div>
+      </div>
+
+      <!-- Couple Chat -->
+      <div class="glass-card rounded-3xl p-4 flex flex-col h-[340px]">
+        <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-100">
+          <span class="text-xs font-extrabold text-slate-800" data-i18n="chatTitle">Shaxsiy Suhbat 💬</span>
+          <span class="text-[10px] font-semibold text-sky-600">Faqat ikkingiz uchun</span>
+        </div>
+        <div id="chatMessages" class="flex-1 overflow-y-auto space-y-2.5 pr-1 no-scrollbar"></div>
+        <form onsubmit="sendChatMessage(event)" class="mt-3 pt-2.5 border-t border-slate-100 flex gap-2">
+          <input id="chatInput" type="text" required data-i18n-ph="phChatMsg" placeholder="Xabar yozing..." class="flex-1 px-3.5 py-2.5 rounded-2xl bg-sky-50/60 border border-sky-100 text-xs focus:outline-none focus:border-sky-400" />
+          <button type="submit" class="px-4 py-2.5 rounded-2xl sky-gradient text-white text-xs font-bold" data-i18n="btnSend">Yuborish</button>
+        </form>
+      </div>
+    </main>
+
+    <!-- ==================== TAB 5: 4 TA O'YIN + REYTING ==================== -->
+    <main id="tab-games" class="hidden px-4 pt-4 space-y-4 tab-enter">
+      <!-- Scoreboard -->
+      <div class="glass-card rounded-3xl p-4">
+        <div class="flex items-center justify-between mb-2.5">
+          <h2 class="text-sm font-extrabold text-slate-900" data-i18n="gamesLeaderboardTitle">🏆 Juftlik o‘yin reytingi</h2>
+          <span id="gameTotalScoreBadge" class="text-[11px] font-bold text-sky-600 bg-sky-50 px-2.5 py-0.5 rounded-full">Jami: 0 ball</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2.5 text-center">
+          <div class="bg-sky-50 rounded-2xl p-3">
+            <div id="gamePlayer1Name" class="text-xs font-bold text-slate-600 truncate">1-o‘yinchi</div>
+            <div id="gamePlayer1Score" class="text-xl font-extrabold text-sky-600 mt-0.5">0 ball</div>
+          </div>
+          <div class="bg-cyan-50 rounded-2xl p-3">
+            <div id="gamePlayer2Name" class="text-xs font-bold text-slate-600 truncate">Juftingiz</div>
+            <div id="gamePlayer2Score" class="text-xl font-extrabold text-cyan-600 mt-0.5">0 ball</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1. Couple Quiz -->
+      <div class="glass-card rounded-3xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-700 text-[10px] font-extrabold" data-i18n="game1Title">💡 1. Juftlik Viktorinasi (+10)</span>
+          <button type="button" onclick="advanceQuizQuestion()" class="text-xs font-bold text-sky-600" data-i18n="btnNextArrow">Keyingi →</button>
+        </div>
+        <h3 id="quizQuestion" class="text-xs font-extrabold text-slate-900 leading-relaxed"></h3>
+        <div id="quizOptions" class="grid grid-cols-1 gap-2"></div>
+      </div>
+
+      <!-- 2. Who's More Likely To? (NEW) -->
+      <div class="glass-card rounded-3xl p-4 space-y-3 bg-gradient-to-br from-white to-sky-50/50">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-extrabold text-slate-900" data-i18n="game2Title">🤔 2. Kim ko‘proq...? (+5 ball)</h3>
+          <button type="button" onclick="advanceWhoMoreLikely()" class="text-xs font-bold text-sky-600" data-i18n="btnNextArrow">Keyingi →</button>
+        </div>
+        <p id="wmlPromptText" class="text-sm font-extrabold text-slate-900 text-center py-2.5 px-3 bg-sky-50/80 rounded-2xl"></p>
+        <div class="grid grid-cols-2 gap-2.5">
+          <button type="button" id="wmlVoteBtnP1" onclick="castWhoMoreLikelyVote('p1')" class="py-3 px-2 rounded-2xl bg-white border-2 border-sky-200 text-sky-700 text-xs font-extrabold truncate">1-o‘yinchi</button>
+          <button type="button" id="wmlVoteBtnP2" onclick="castWhoMoreLikelyVote('p2')" class="py-3 px-2 rounded-2xl bg-white border-2 border-cyan-200 text-cyan-700 text-xs font-extrabold truncate">2-o‘yinchi</button>
+        </div>
+        <div id="wmlVotesSummaryBox" class="text-xs bg-sky-50/70 rounded-2xl p-3 space-y-1 text-slate-700"></div>
+      </div>
+
+      <!-- 3. Truth or Dare (With Claim Points Button) -->
+      <div class="glass-card rounded-3xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-extrabold" data-i18n="game3Title">🎲 3. Haqiqat yoki Vazifa (+15)</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" onclick="playTruthOrDare('truth')" class="py-2.5 rounded-xl bg-sky-50 border border-sky-200 text-sky-700 text-xs font-extrabold" data-i18n="btnTruth">Haqiqat 🩵</button>
+          <button type="button" onclick="playTruthOrDare('dare')" class="py-2.5 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-700 text-xs font-extrabold" data-i18n="btnDare">Vazifa ✨</button>
+        </div>
+        <div class="p-3.5 rounded-2xl sky-soft border border-sky-200 text-center space-y-2.5">
+          <div id="todCardBadge" class="inline-block text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-white text-sky-600">Tanlang</div>
+          <p id="todText" class="text-xs font-bold text-slate-800" data-i18n="todPickPrompt">Yuqoridan «Haqiqat 🩵» yoki «Vazifa ✨» tugmasini bosing!</p>
+          <button type="button" id="todClaimPointsBtn" onclick="claimTruthOrDarePoints()" class="hidden w-full py-2 rounded-xl sky-gradient text-white text-xs font-bold" data-i18n="btnTodClaim">Bajardim! (+15 ball) ✅</button>
+        </div>
+      </div>
+
+      <!-- 4. Memory Match 4x4 (NEW) -->
+      <div class="glass-card rounded-3xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-xs font-extrabold text-slate-900" data-i18n="game4Title">🃏 4. Xotira Juftligi 4×4 (+25 ball)</h3>
+            <p id="memoryStatsText" class="text-[11px] text-slate-500">0 • 0/8</p>
+          </div>
+          <button type="button" onclick="initMemoryMatchGame()" class="px-3 py-1.5 rounded-xl bg-sky-50 text-sky-700 border border-sky-200 text-xs font-bold" data-i18n="btnResetMemory">Qayta ↻</button>
+        </div>
+        <div id="memoryGridContainer" class="grid grid-cols-4 gap-2"></div>
+      </div>
+    </main>
+
+    <!-- ==================== TAB 6: BIZNING MASOFAMIZ (LocationManager + Geolocation + Haversine + Open-Meteo 10m Cache) ==================== -->
+    <main id="tab-distance" class="hidden px-4 pt-4 space-y-4 tab-enter">
+      <div>
+        <h2 class="text-lg font-extrabold text-slate-900" data-i18n="distanceTabTitle">Bizning masofamiz 📍</h2>
+        <p class="text-[11px] text-slate-500" data-i18n="distanceTabDesc">Faqat ilovaga kirganda bir marta va ikki tomonlama rozilik bilan yangilanadi (fon GPS yo‘q).</p>
+      </div>
+
+      <!-- Haversine Result Banner -->
+      <div class="rounded-3xl sky-gradient p-5 text-white shadow-lg shadow-sky-200/80 text-center">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-sky-100" data-i18n="straightLineLabel">Taxminiy to‘g‘ri chiziq masofasi</div>
+        <div id="haversineResultDisplay" class="text-3xl font-extrabold my-1.5">— km</div>
+        <div id="haversineStatusNote" class="text-[11px] text-sky-100 leading-snug">
+          Masofani ko‘rish uchun har ikki tomon ham joylashuvni ulashishga rozilik berishi kerak.
+        </div>
+      </div>
+
+      <!-- My Location & Weather Card -->
+      <div class="glass-card rounded-3xl p-4">
+        <div class="flex items-center justify-between mb-2">
+          <div>
+            <span class="text-[10px] font-extrabold uppercase text-sky-600" data-i18n="yourLocationLabel">Sizning joylashuvingiz</span>
+            <h3 id="myLocCityName" class="text-sm font-extrabold text-slate-900">Aniqlanmagan</h3>
+          </div>
+          <span id="myLocStatusBadge" class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold">O‘chirilgan</span>
+        </div>
+
+        <div id="myWeatherBox" class="hidden p-3 rounded-2xl sky-soft border border-sky-100 mb-3 text-xs">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span id="myWeatherIcon" class="text-2xl">🌤️</span>
+              <span id="myWeatherTemp" class="text-xl font-extrabold text-slate-900">—°C</span>
+            </div>
+            <span id="myWeatherDesc" class="font-bold text-sky-700">—</span>
+          </div>
+          <div id="myWeatherMeta" class="text-[10px] text-slate-500 mt-1.5">Namlik: — • Shamol: — • Kesh: —</div>
+        </div>
+
+        <p id="myLocUpdatedText" class="text-[10px] text-slate-400 mb-3">Oxirgi yangilanish: hali yangilanmagan</p>
+
+        <div class="space-y-2.5 border-t border-slate-100 pt-3">
+          <div class="flex items-center justify-between text-xs gap-2">
+            <span class="font-semibold text-slate-700">1. Qurilma joylashuvi (sessiyada 1 marta)</span>
+            <button type="button" id="btnShareMyLocation" onclick="requestSessionLocationWithConsent()" class="px-3 py-1.5 rounded-xl sky-gradient text-white text-[11px] font-bold shadow-sm shrink-0">
+              Joylashuvimni ulashish
+            </button>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold text-slate-700">2. Juftimga ko‘rsatish roziligi</span>
+            <input id="toggleShareWithPartner" type="checkbox" onchange="togglePartnerLocationConsent(this.checked)" class="w-4 h-4 accent-sky-500 rounded" />
+          </div>
+          <button type="button" id="btnRevokeLocation" onclick="revokeAndDeleteMyLocation()" class="hidden w-full py-2 rounded-xl bg-rose-50 text-rose-600 text-[11px] font-bold">
+            Ruxsatni bekor qilish va koordinatani o‘chirish
+          </button>
+        </div>
+      </div>
+
+      <!-- Partner Location & Weather Card -->
+      <div class="glass-card rounded-3xl p-4">
+        <div class="flex items-center justify-between mb-2">
+          <div>
+            <span class="text-[10px] font-extrabold uppercase text-slate-500" data-i18n="partnerLocationLabel">Juftingiz joylashuvi</span>
+            <h3 id="partnerLocCityName" class="text-sm font-extrabold text-slate-900">Juftingiz kutilmoqda</h3>
+          </div>
+          <span id="partnerLocStatusBadge" class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold">Yopiq</span>
+        </div>
+
+        <div id="partnerWeatherBox" class="hidden p-3 rounded-2xl bg-slate-50 border border-slate-200/70 mb-2 text-xs">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span id="partnerWeatherIcon" class="text-2xl">🌤️</span>
+              <span id="partnerWeatherTemp" class="text-xl font-extrabold text-slate-900">—°C</span>
+            </div>
+            <span id="partnerWeatherDesc" class="font-bold text-slate-700">—</span>
+          </div>
+          <div id="partnerWeatherMeta" class="text-[10px] text-slate-500 mt-1.5">Namlik: — • Shamol: —</div>
+        </div>
+
+        <p id="partnerLocUpdatedText" class="text-[10px] text-slate-400">Oxirgi yangilanish: ma’lumot yo‘q</p>
+      </div>
+
+      <div class="text-[10px] text-slate-400 leading-relaxed px-1">
+        Ob-havo <b>Open-Meteo Forecast API</b> orqali 10 daqiqalik kesh bilan yangilanadi (kesh vaqti ko‘rsatiladi). O‘zgidromet rasmiy ogohlantirishlari: <a href="https://hydromet.uz/" target="_blank" class="text-sky-600 underline">hydromet.uz</a>.
+      </div>
+    </main>
+
+    <!-- MINI AUDIO PLAYER WITH LIVE PROGRESS BAR -->
+    <div id="audioPlayerBar" class="hidden fixed bottom-[68px] left-1/2 -translate-x-1/2 w-[92%] max-w-md z-30 sky-glass rounded-2xl px-3.5 py-2.5 border border-sky-200 shadow-xl">
+      <div class="flex items-center justify-between gap-2.5">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <button type="button" id="playPauseBtn" onclick="togglePlayPause()" class="w-9 h-9 rounded-xl sky-gradient text-white flex items-center justify-center text-sm font-bold shrink-0">⏸</button>
+          <div class="min-w-0">
+            <div id="nowPlayingTitle" class="text-xs font-extrabold text-slate-900 truncate">Qo‘shiq</div>
+            <div id="nowPlayingArtist" class="text-[10px] text-sky-600 font-semibold truncate">Ijrochi</div>
+          </div>
+        </div>
+        <button type="button" onclick="closeAudioPlayer()" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 text-xs font-bold flex items-center justify-center">✕</button>
+      </div>
+      <div class="w-full bg-sky-100 h-1 rounded-full mt-2 overflow-hidden">
+        <div id="miniPlayerProgressBar" class="bg-sky-500 h-full w-0 transition-all duration-200"></div>
+      </div>
+      <audio id="htmlAudio" preload="none" onended="onSongEnded()"></audio>
+    </div>
+
+    <!-- BOTTOM 6-TAB NAVIGATION -->
+    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-40 sky-glass border-t border-sky-100 px-1 py-2 grid grid-cols-6">
+      <button type="button" onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center py-0.5 text-sky-600 font-extrabold">
+        <span class="text-base">🏠</span>
+        <span class="text-[9px] mt-0.5" data-i18n="navHome">Asosiy</span>
+      </button>
+      <button type="button" onclick="switchTab('gallery')" id="nav-gallery" class="flex flex-col items-center py-0.5 text-slate-400 font-semibold">
+        <span class="text-base">🖼️</span>
+        <span class="text-[9px] mt-0.5" data-i18n="navGallery">Galereya</span>
+      </button>
+      <button type="button" onclick="switchTab('music')" id="nav-music" class="flex flex-col items-center py-0.5 text-slate-400 font-semibold">
+        <span class="text-base">🎧</span>
+        <span class="text-[9px] mt-0.5" data-i18n="navMusic">Musiqa</span>
+      </button>
+      <button type="button" onclick="switchTab('chat')" id="nav-chat" class="flex flex-col items-center py-0.5 text-slate-400 font-semibold">
+        <span class="text-base">💬</span>
+        <span class="text-[9px] mt-0.5" data-i18n="navChat">Suhbat</span>
+      </button>
+      <button type="button" onclick="switchTab('games')" id="nav-games" class="flex flex-col items-center py-0.5 text-slate-400 font-semibold">
+        <span class="text-base">🎮</span>
+        <span class="text-[9px] mt-0.5" data-i18n="navGames">O‘yinlar</span>
+      </button>
+      <button type="button" onclick="switchTab('distance')" id="nav-distance" class="flex flex-col items-center py-0.5 text-slate-400 font-semibold">
+        <span class="text-base">📍</span>
+        <span class="text-[9px] mt-0.5" data-i18n="navDistance">Masofa</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- CUSTOM CONFIRMATION MODAL (No ugly browser alert/confirm) -->
+  <div id="customConfirmModal" class="fixed inset-0 z-[130] hidden items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl w-full max-w-xs p-5 space-y-4 shadow-2xl text-center">
+      <div class="w-12 h-12 mx-auto rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center text-2xl">🗑️</div>
+      <div class="space-y-1">
+        <h3 id="confirmModalTitle" class="text-sm font-extrabold text-slate-900">Tasdiqlang</h3>
+        <p id="confirmModalBody" class="text-xs text-slate-500 leading-relaxed"></p>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" onclick="closeModal('customConfirmModal')" class="py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold" data-i18n="btnCancel">Bekor qilish</button>
+        <button type="button" id="confirmModalProceedBtn" class="py-2.5 rounded-xl bg-rose-500 text-white text-xs font-bold" data-i18n="btnDeleteConfirm">O‘chirish 🗑️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE, PHONE CONSENT, TELEGRAM BOT LINKING & ARCHIVE MODAL -->
+  <div id="profileModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/45 backdrop-blur-sm p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-5 shadow-2xl border border-sky-100 my-auto max-h-[90vh] overflow-y-auto space-y-3.5">
+      <div class="flex justify-between items-center">
+        <h3 class="text-base font-extrabold text-slate-900" data-i18n="profileModalTitle">Profil va Sozlamalar ⚙️</h3>
+        <button type="button" onclick="closeModal('profileModal')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold">✕</button>
+      </div>
+
+      <div class="p-3.5 rounded-2xl sky-soft border border-sky-100 space-y-1.5 text-xs">
+        <div class="flex justify-between gap-2"><span class="text-slate-500">Foydalanuvchi:</span><span id="profFullName" class="font-extrabold text-slate-900 truncate">-</span></div>
+        <div class="flex justify-between gap-2"><span class="text-slate-500">Email:</span><span id="profEmail" class="font-semibold text-slate-800 truncate">-</span></div>
+        <div class="flex justify-between"><span class="text-slate-500">Rol:</span><span id="profRoleBadge" class="font-extrabold text-sky-700 uppercase">USER</span></div>
+        <div class="flex justify-between items-center">
+          <span class="text-slate-500">Juftlik kodi:</span>
+          <button type="button" onclick="copyInviteCode()" id="profInviteCode" class="font-extrabold text-sky-600 hover:underline">LOVE-0000</button>
+        </div>
+        <div class="flex justify-between"><span class="text-slate-500">Juftingiz:</span><span id="profPartnerStatus" class="font-bold text-slate-600">Ulanmagan</span></div>
+        <div class="flex justify-between"><span class="text-slate-500">Telefon:</span><span id="profPhoneStatus" class="font-semibold text-slate-500">Ulashilmagan</span></div>
+      </div>
+
+      <!-- Connect Partner -->
+      <div id="connectPartnerSection" class="space-y-1.5">
+        <label class="block text-[11px] font-bold text-slate-600">Juftingiz kodini ulash:</label>
+        <div class="flex gap-2">
+          <input id="partnerCodeInput" type="text" placeholder="LOVE-XXXX" class="flex-1 px-3 py-2 rounded-xl bg-sky-50 border border-sky-200 text-xs font-bold uppercase" />
+          <button type="button" onclick="connectPartnerByCode()" class="px-4 py-2 rounded-xl sky-gradient text-white text-xs font-bold">Ulash</button>
+        </div>
+      </div>
+
+      <!-- Telegram Bot Linking Card (NEW from alternative variant) -->
+      <div class="p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold text-slate-900">Telegram Bot ulash 🤖</span>
+          <span id="tgBotStatusBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Ulanmagan</span>
+        </div>
+        <p id="tgBotDescText" class="text-[10px] text-slate-600 leading-relaxed">Botga quyidagi buyruqni yuboring — shunda /addmusic orqali yuborgan qo‘shiqlaringiz shu profilga tushadi:</p>
+        <div id="tgLinkCommandBox" class="flex items-center justify-between bg-white border border-sky-200 rounded-xl px-3 py-2">
+          <code id="tgLinkCommandText" class="text-xs font-extrabold text-sky-700">/link LOVE-0000</code>
+          <button type="button" onclick="copyTelegramLinkCommand()" class="px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 text-[10px] font-bold">Nusxalash</button>
+        </div>
+        <button type="button" id="btnAutoLinkTgWebApp" onclick="autoLinkCurrentTelegramUser()" class="hidden w-full py-2 rounded-xl bg-sky-500 text-white text-[11px] font-bold">Shu Telegram akkauntni 1 bosishda ulash ⚡</button>
+      </div>
+
+      <!-- Optional Phone Verification via Bot -->
+      <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+        <div class="text-xs font-extrabold text-slate-800">Telefon raqam (ixtiyoriy) 📱</div>
+        <p class="text-[10px] text-slate-500 leading-relaxed">Faqat roziligingiz bilan Telegram bot orqali tasdiqlanadi va juftingizga avtomatik ko‘rsatilmaydi.</p>
+        <div class="flex gap-2">
+          <button type="button" onclick="requestTelegramPhoneContact()" class="flex-1 py-2 rounded-xl bg-sky-500 text-white text-[11px] font-bold">Telefon raqamimni ulashish</button>
+          <button type="button" id="btnDeletePhone" onclick="deleteSavedPhone()" class="hidden px-3 py-2 rounded-xl bg-rose-50 text-rose-600 text-[11px] font-bold">O‘chirish</button>
+        </div>
+      </div>
+
+      <!-- Archive & Support -->
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" onclick="openArchivePinPrompt('view')" class="py-2.5 px-3 rounded-2xl bg-slate-900 text-white text-[11px] font-bold">🔐 Shaxsiy Arxiv</button>
+        <button type="button" onclick="openSupportTicketModal()" class="py-2.5 px-3 rounded-2xl bg-amber-50 text-amber-800 text-[11px] font-bold border border-amber-200">🆘 Yordam / Shikoyat</button>
+      </div>
+
+      <button type="button" id="btnEndRelationshipArchive" onclick="openArchivePinPrompt('archive')" class="hidden w-full py-2.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 font-bold text-[11px]">
+        📦 Juftlikni yakunlash va PIN-arxivga saqlash
+      </button>
+
+      <button type="button" onclick="logoutUser()" class="w-full py-3 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs">
+        Profildan chiqish 🚪
+      </button>
+    </div>
+  </div>
+
+  <!-- ARCHIVE PIN MODAL (SHA-256 HASHED) -->
+  <div id="archivePinModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl w-full max-w-xs p-5 space-y-3.5 shadow-2xl text-center">
+      <div id="archivePinIcon" class="w-12 h-12 mx-auto rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center text-2xl">🔐</div>
+      <h3 id="archivePinModalTitle" class="text-sm font-extrabold text-slate-900">Shaxsiy Arxiv PIN-kodi</h3>
+      <p id="archivePinModalDesc" class="text-xs text-slate-500 leading-relaxed">4 xonali PIN-kodingizni kiriting.</p>
+      <input type="password" id="archivePinInput" inputmode="numeric" maxlength="4" placeholder="••••" class="w-full px-3 py-2.5 rounded-xl bg-sky-50 border border-sky-200 text-lg font-extrabold tracking-[0.5em] text-center" />
+      <input type="password" id="archivePinConfirmInput" inputmode="numeric" maxlength="4" placeholder="PIN-kodni tasdiqlang" class="hidden w-full px-3 py-2.5 rounded-xl bg-sky-50 border border-sky-200 text-sm font-extrabold tracking-[0.35em] text-center" />
+      <p id="archivePinErrorText" class="hidden text-xs text-rose-500 font-semibold"></p>
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" onclick="closeModal('archivePinModal')" class="py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">Bekor qilish</button>
+        <button type="button" onclick="submitArchivePinAction()" class="py-2.5 rounded-xl sky-gradient text-white text-xs font-bold">Tasdiqlash ✅</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MULTI-TAB PERSONAL ARCHIVE VAULT MODAL (Media | Musiqa | Suhbat | Rejalar) -->
+  <div id="archiveVaultModal" class="fixed inset-0 z-[85] hidden items-center justify-center bg-slate-900/75 backdrop-blur-sm p-3">
+    <div class="bg-white rounded-3xl w-full max-w-md p-4 space-y-3 shadow-2xl max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-sky-100 pb-2.5 shrink-0">
+        <div>
+          <h3 class="text-base font-extrabold text-slate-900">🔐 Shaxsiy Xotira Arxivi</h3>
+          <p class="text-[11px] text-slate-500">Faqat sizning 4 xonali PIN-kodingiz bilan ochiladigan arxiv</p>
+        </div>
+        <button type="button" onclick="closeModal('archiveVaultModal')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 text-sm font-bold">✕</button>
+      </div>
+      <div id="archiveListContainer" class="overflow-y-auto space-y-2.5 flex-1"></div>
+      <div id="archiveDetailContainer" class="hidden overflow-y-auto space-y-3 flex-1">
+        <button type="button" onclick="backToArchiveList()" class="text-xs font-bold text-sky-600">← Barcha arxivlarga qaytish</button>
+        <div id="archiveDetailHeader" class="bg-sky-50 border border-sky-100 rounded-2xl p-3 text-xs space-y-1"></div>
+        <div class="grid grid-cols-4 gap-1 bg-sky-50 p-1 rounded-xl text-[11px] font-bold">
+          <button type="button" id="arcTab-media" onclick="switchArchiveDetailTab('media')" class="py-1.5 rounded-lg bg-white text-sky-600">Media</button>
+          <button type="button" id="arcTab-music" onclick="switchArchiveDetailTab('music')" class="py-1.5 rounded-lg text-slate-500">Musiqa</button>
+          <button type="button" id="arcTab-chat" onclick="switchArchiveDetailTab('chat')" class="py-1.5 rounded-lg text-slate-500">Suhbat</button>
+          <button type="button" id="arcTab-notes" onclick="switchArchiveDetailTab('notes')" class="py-1.5 rounded-lg text-slate-500">Rejalar</button>
+        </div>
+        <div id="archiveDetailBody" class="space-y-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHOTO LIGHTBOX MODAL (NEW) -->
+  <div id="photoLightboxModal" class="fixed inset-0 z-[90] hidden items-center justify-center bg-slate-900/80 p-4">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-4 space-y-3 shadow-2xl">
+      <img id="lightboxPhotoImg" alt="Xotira" class="w-full max-h-72 object-cover rounded-2xl bg-sky-50" />
+      <div class="flex items-center justify-between">
+        <div>
+          <span id="lightboxPhotoCategory" class="text-[10px] font-bold bg-sky-50 text-sky-700 px-2.5 py-0.5 rounded-full">Toifa</span>
+          <span id="lightboxPhotoAuthor" class="text-xs font-bold text-sky-600 ml-1.5"></span>
+        </div>
+        <button type="button" onclick="incrementLightboxPhotoLike()" class="px-3 py-1 rounded-full bg-rose-50 text-rose-600 text-xs font-bold">❤️ <span id="lightboxPhotoLikes">0</span></button>
+      </div>
+      <input type="text" id="lightboxPhotoCaptionField" class="w-full px-3 py-2 rounded-xl bg-sky-50 border border-sky-100 text-xs focus:outline-none" />
+      <div class="flex gap-2">
+        <button type="button" onclick="saveLightboxPhotoCaption()" class="flex-1 py-2.5 rounded-xl sky-gradient text-white text-xs font-bold">Saqlash</button>
+        <button type="button" onclick="deleteGalleryItem(activeLightboxId)" class="px-3 py-2.5 rounded-xl bg-rose-50 text-rose-600 text-xs font-bold">🗑️</button>
+        <button type="button" onclick="closeModal('photoLightboxModal')" class="px-3.5 py-2.5 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold">Yopish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD CUSTOM SECRET QUESTION MODAL (NEW) -->
+  <div id="addSecretQuestionModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 p-4">
+    <div class="bg-white rounded-3xl w-full max-w-xs p-5 space-y-3 shadow-2xl">
+      <h3 class="text-sm font-extrabold text-slate-900">🔐 Yangi sirli savol qo‘shish</h3>
+      <input type="text" id="newSecretQuestionField" placeholder="Juftingizga bermoqchi bo‘lgan savol..." class="w-full px-3 py-2.5 rounded-xl bg-sky-50 border border-sky-200 text-xs" />
+      <div class="flex gap-2">
+        <button type="button" onclick="saveNewSecretQuestion()" class="flex-1 py-2.5 rounded-xl sky-gradient text-white text-xs font-bold">Qo‘shish</button>
+        <button type="button" onclick="closeModal('addSecretQuestionModal')" class="px-3.5 py-2.5 rounded-xl bg-slate-100 text-xs font-bold">Bekor</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUPER ADMIN & ADMIN DASHBOARD MODAL -->
+  <div id="adminDashboardModal" class="fixed inset-0 z-[95] hidden bg-slate-900/55 backdrop-blur-sm overflow-y-auto">
+    <div class="min-h-screen max-w-md mx-auto bg-slate-50 flex flex-col">
+      <div class="sticky top-0 z-20 bg-slate-900 text-white px-4 py-3.5 flex items-center justify-between">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-extrabold">🛡️ Boshqaruv Markazi</span>
+            <span id="adminRolePill" class="px-2 py-0.5 rounded-full bg-sky-500 text-white text-[9px] font-extrabold">SUPER ADMIN</span>
+          </div>
+          <p class="text-[10px] text-slate-400">Rolga asoslangan kirish va audit nazorati</p>
+        </div>
+        <button type="button" onclick="closeModal('adminDashboardModal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center font-bold">✕</button>
+      </div>
+
+      <div class="bg-white border-b border-slate-200 px-3 py-2 flex gap-1.5 overflow-x-auto no-scrollbar">
+        <button type="button" onclick="switchAdminSubTab('overview')" id="adTab-overview" class="px-3 py-1.5 rounded-xl bg-slate-900 text-white text-[11px] font-bold whitespace-nowrap">📊 Statistika</button>
+        <button type="button" onclick="switchAdminSubTab('users')" id="adTab-users" class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 text-[11px] font-bold whitespace-nowrap">👥 Foydalanuvchilar</button>
+        <button type="button" onclick="switchAdminSubTab('roles')" id="adTab-roles" class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 text-[11px] font-bold whitespace-nowrap">🔑 Adminlar</button>
+        <button type="button" onclick="switchAdminSubTab('tickets')" id="adTab-tickets" class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 text-[11px] font-bold whitespace-nowrap">🆘 Murojaatlar</button>
+        <button type="button" onclick="switchAdminSubTab('announce')" id="adTab-announce" class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 text-[11px] font-bold whitespace-nowrap">📢 E’lonlar</button>
+        <button type="button" onclick="switchAdminSubTab('audit')" id="adTab-audit" class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 text-[11px] font-bold whitespace-nowrap">📜 Audit</button>
+      </div>
+
+      <div class="p-4 space-y-4 flex-1">
+        <div id="adminPane-overview" class="space-y-3">
+          <div class="grid grid-cols-2 gap-2.5">
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-200"><div class="text-[11px] text-slate-500 font-semibold">Jami foydalanuvchilar</div><div id="adStatTotalUsers" class="text-2xl font-extrabold text-slate-900 mt-1">0</div></div>
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-200"><div class="text-[11px] text-slate-500 font-semibold">Ulangan juftliklar</div><div id="adStatPairedUsers" class="text-2xl font-extrabold text-sky-600 mt-1">0</div></div>
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-200"><div class="text-[11px] text-slate-500 font-semibold">Bugun faol</div><div id="adStatActiveToday" class="text-2xl font-extrabold text-emerald-600 mt-1">0</div></div>
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-200"><div class="text-[11px] text-slate-500 font-semibold">Ochiq murojaatlar</div><div id="adStatOpenTickets" class="text-2xl font-extrabold text-amber-600 mt-1">0</div></div>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 text-xs">
+            <div class="font-extrabold text-slate-800 mb-1">Maxfiylik kafolati 🔒</div>
+            <p class="text-[11px] text-slate-500 leading-relaxed">Adminlar profil holati, statistika va murojaatlarni boshqaradi. Shaxsiy chatlar va PIN-arxivlar maxfiylik tamoyiliga ko‘ra admin panelida ko‘rsatilmaydi.</p>
+          </div>
+        </div>
+
+        <div id="adminPane-users" class="hidden space-y-3">
+          <input id="adminUserSearch" type="text" oninput="renderAdminUsersList()" placeholder="Ism, email yoki LOVE-kod bo‘yicha qidirish..." class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-xs" />
+          <div id="adminUsersContainer" class="space-y-2.5"></div>
+        </div>
+
+        <div id="adminPane-roles" class="hidden space-y-3">
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-3">
+            <h4 class="text-xs font-extrabold text-slate-900">Yangi Admin tayinlash (Faqat Super Admin)</h4>
+            <input id="promoteAdminEmail" type="email" placeholder="Foydalanuvchi email manzili" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs" />
+            <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-700">
+              <label class="flex items-center gap-1.5"><input type="checkbox" id="permViewUsers" checked /> Foydalanuvchilarni ko‘rish</label>
+              <label class="flex items-center gap-1.5"><input type="checkbox" id="permBanUsers" /> Bloklash / Cheklash</label>
+              <label class="flex items-center gap-1.5"><input type="checkbox" id="permTickets" checked /> Murojaatlar</label>
+              <label class="flex items-center gap-1.5"><input type="checkbox" id="permAnnounce" /> E’lon yuborish</label>
+            </div>
+            <button type="button" onclick="assignAdminRole()" class="w-full py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold">Admin vakolatini berish ✅</button>
+          </div>
+          <div id="adminStaffList" class="space-y-2"></div>
+        </div>
+
+        <div id="adminPane-tickets" class="hidden space-y-2.5"><div id="adminTicketsList" class="space-y-2.5"></div></div>
+
+        <div id="adminPane-announce" class="hidden space-y-3">
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2.5">
+            <h4 class="text-xs font-extrabold text-slate-900">Umumiy e’lon yuborish 📢</h4>
+            <textarea id="globalAnnouncementInput" rows="3" placeholder="Ilova yangiliklari yoki muhim xabar..." class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs"></textarea>
+            <button type="button" onclick="publishGlobalAnnouncement()" class="w-full py-2.5 rounded-xl sky-gradient text-white text-xs font-bold">E’lonni chop etish</button>
+          </div>
+        </div>
+
+        <div id="adminPane-audit" class="hidden space-y-2"><div id="adminAuditList" class="space-y-2"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUPPORT MODAL -->
+  <div id="supportModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/45 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-5 shadow-2xl">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="text-base font-extrabold text-slate-900">Yordam markazi va Shikoyat 🆘</h3>
+        <button type="button" onclick="closeModal('supportModal')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold">✕</button>
+      </div>
+      <form onsubmit="submitSupportTicket(event)" class="space-y-3">
+        <select id="ticketTypeSelect" class="w-full px-3 py-2.5 rounded-xl bg-sky-50 border border-sky-200 text-xs font-bold">
+          <option value="support">Texnik yordam / Savol</option>
+          <option value="report">Shikoyat yuborish</option>
+          <option value="idea">Ilova uchun taklif</option>
+        </select>
+        <textarea id="ticketMessageInput" rows="3" required placeholder="Muammo yoki taklifingizni batafsil yozing..." class="w-full px-3.5 py-2.5 rounded-xl bg-sky-50/70 border border-sky-200 text-xs"></textarea>
+        <button type="submit" class="w-full py-3 rounded-2xl sky-gradient text-white font-bold text-xs">Adminlarga yuborish 📩</button>
+      </form>
+      <div id="myTicketsHistory" class="mt-4 pt-3 border-t border-slate-100 space-y-2 max-h-40 overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <!-- DATE MODAL -->
+  <div id="dateModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/45 p-4">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-5 shadow-2xl">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="text-base font-extrabold text-slate-900">Boshlanish sanasi 📅</h3>
+        <button type="button" onclick="closeModal('dateModal')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold">✕</button>
+      </div>
+      <input id="relationshipDateInput" type="date" class="w-full px-3.5 py-3 rounded-xl bg-sky-50 border border-sky-200 text-sm mb-4" />
+      <button type="button" onclick="saveRelationshipDate()" class="w-full py-3 rounded-2xl sky-gradient text-white font-bold text-xs">Saqlash ✨</button>
+    </div>
+  </div>
+
+  <!-- PHOTO / VIDEO UPLOAD MODAL (CANVAS COMPRESSION + 15MB GUARD) -->
+  <div id="photoModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/45 p-4">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="text-base font-extrabold text-slate-900">Rasm yoki Video yuklash 🖼️</h3>
+        <button type="button" onclick="closeModal('photoModal')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold">✕</button>
+      </div>
+      <form onsubmit="uploadPhotoOrVideo(event)" class="space-y-3">
+        <label class="block border-2 border-dashed border-sky-200 rounded-2xl p-4 text-center cursor-pointer hover:bg-sky-50/50">
+          <input id="photoFileInput" type="file" accept="image/*,video/mp4,video/quicktime" required class="hidden" onchange="previewSelectedMedia(event)" />
+          <div id="photoPreviewBox" class="text-xs text-sky-600 font-bold">📸 Rasm yoki Video tanlash (maks. 15 MB)</div>
+        </label>
+        <div id="mediaPreviewContainer" class="hidden">
+          <img id="uploadImgPreview" class="hidden w-full h-36 object-cover rounded-2xl border border-sky-100" />
+          <video id="uploadVidPreview" controls playsinline class="hidden w-full h-36 object-cover rounded-2xl bg-slate-900"></video>
+        </div>
+        <div>
+          <div id="photoPresetChips" class="flex flex-wrap gap-1.5 mb-2"></div>
+          <input id="photoCategoryInput" type="text" required placeholder="Bo‘lim nomi (yoki o‘zingiz yozing)" class="w-full px-3.5 py-2.5 rounded-xl bg-sky-50/70 border border-sky-200 text-xs font-semibold" />
+        </div>
+        <input id="photoCaptionInput" type="text" required placeholder="Izoh yozing..." class="w-full px-3.5 py-2.5 rounded-xl bg-sky-50/70 border border-sky-200 text-xs" />
+        <button id="uploadPhotoBtn" type="submit" class="w-full py-3 rounded-2xl sky-gradient text-white font-bold text-xs">Yuklash ✨</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MUSIC UPLOAD MODAL -->
+  <div id="musicModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/45 p-4">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-5 shadow-2xl">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="text-base font-extrabold text-slate-900">Qo‘shiq yuklash 🎵</h3>
+        <button type="button" onclick="closeModal('musicModal')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold">✕</button>
+      </div>
+      <form onsubmit="uploadSong(event)" class="space-y-3">
+        <label class="block border-2 border-dashed border-sky-200 rounded-2xl p-4 text-center cursor-pointer hover:bg-sky-50/50">
+          <input id="audioFileInput" type="file" accept="audio/*" required class="hidden" onchange="onAudioFilePicked(event)" />
+          <div id="audioFileNameLabel" class="text-xs text-sky-600 font-bold">🎧 MP3 fayl tanlash (maks. 15 MB)</div>
+        </label>
+        <input id="songTitleInput" type="text" required placeholder="Qo‘shiq nomi" class="w-full px-3.5 py-2.5 rounded-xl bg-sky-50/70 border border-sky-200 text-xs" />
+        <input id="songArtistInput" type="text" required placeholder="Ijrochi" class="w-full px-3.5 py-2.5 rounded-xl bg-sky-50/70 border border-sky-200 text-xs" />
+        <select id="songPlaylistSelect" class="w-full px-3.5 py-2.5 rounded-xl bg-sky-50/70 border border-sky-200 text-xs font-semibold">
+          <option value="shared">Umumiy playlist 🩵</option>
+          <option value="personal">Shaxsiy playlistim 🎧</option>
+        </select>
+        <button id="uploadSongBtn" type="submit" class="w-full py-3 rounded-2xl sky-gradient text-white font-bold text-xs">Qo‘shish 🎶</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ==================== CONFIG ====================
+    const SUPABASE_URL = 'https://vncglehzpctlfzupzatl.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_XbXyPRW4ebp5VfjrwqbCww_yriC5Vul';
+    const STORAGE_BUCKET = 'couple-media';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const EMAILJS_SERVICE_ID = 'service_ety84gd';
+    const EMAILJS_TEMPLATE_ID = 'template_pboi94d';
+    const EMAILJS_PUBLIC_KEY = 'yv7C-joQKkq4ZBuhN';
+    const SUPER_ADMIN_EMAIL = 'dilhushbeki58@gmail.com';
+    const TELEGRAM_BOT_USERNAME = 'juftlik_makoni_bot';
+
+    if (window.emailjs) emailjs.init(EMAILJS_PUBLIC_KEY);
+    const tg = window.Telegram?.WebApp;
+    if (tg) { tg.ready(); tg.expand(); }
+
+    // ==================== STATE ====================
+    let currentUser = null;
+    let partnerUser = null;
+    let spaceData = null;
+    let myLocationRow = null;
+    let partnerLocationRow = null;
+    let locationCheckedThisSession = false;
+    let lastLocationRefreshAt = 0;
+    const WEATHER_CACHE = new Map(); // 10-min in-memory cache
+
+    let currentLang = localStorage.getItem('jm_lang') || 'uz';
+    let activeGalleryFilter = '__ALL__';
+    let activePlaylistFilter = 'all';
+    let activeLightboxId = null;
+    let compressedUploadDataUrl = null;
+    let currentPlayingSongId = null;
+    let isPlaying = false;
+    let pendingAuthCodes = {};
+    let silentSyncTimer = null;
+    let backgroundPollInterval = null;
+    let lastSyncedHash = '';
+    let expandedCapsuleIds = new Set();
+
+    // Archive modal state
+    let currentPinModalMode = 'view';
+    let activeArchiveDetailObj = null;
+
+    // Admin state
+    let adminAllUsers = [];
+    let adminAllTickets = [];
+    let adminAuditLogs = [];
+
+    const DEFAULT_GALLERY_CATEGORIES = ['Uchrashuvlar', 'Sayohatlar', 'Maxsus kunlar'];
+    const DEFAULT_SECRET_QUESTIONS = [
+      { q: "Birinchi uchrashuvimizda eng esda qolgan lahza qaysi edi?", answers: {} },
+      { q: "Birgalikda qaysi shaharga sayohat qilishni xohlaysiz?", answers: {} },
+      { q: "Juftingizning sizga eng yoqadigan 3 ta xislati nima?", answers: {} },
+      { q: "Kelajakdagi eng katta umumiy orzuimiz qaysi?", answers: {} }
+    ];
+    const QUIZ_BANK = [
+      { q: "Mustahkam munosabatning eng asosiy poydevori nima?", opts: ["O‘zaro ishonch va samimiyat 🩵", "Faqat sovg‘alar", "Har doim sukut saqlash"], ans: 0 },
+      { q: "Juftingiz kayfiyati tushganda eng yaxshi yordam nima?", opts: ["E’tibor bermaslik", "Mehr bilan qo‘llab-quvvatlash ✨", "Bahslashish"], ans: 1 },
+      { q: "Eng esda qolarli uchrashuv qanday o‘tadi?", opts: ["Telefonga qarab o‘tirib", "Chin dildan suhbatlashib ☕", "Shoshilib"], ans: 1 },
+      { q: "Tushunmovchilik bo‘lganda qanday yo‘l tutish eng to‘g‘ri?", opts: ["Sokinlik bilan tinglash va hal qilish 🕊️", "Jahlda uzoqlashish", "Eski xatolarni eslash"], ans: 0 }
+    ];
+    const WHO_MORE_LIKELY_QS = [
+      "Kim birinchi uzr so‘raydi? 🕊️",
+      "Kim ko‘proq shirinlik yaxshi ko‘radi? 🍰",
+      "Kim sayohatni ko‘proq yaxshi ko‘radi? ✈️",
+      "Kim kechroq uxlaydi? 🌙",
+      "Kim ko‘proq rasmga tushishni yoqtiradi? 📸",
+      "Kim birinchi «Sog‘indim» deb yozadi? 🩵"
+    ];
+    const TRUTHS = [
+      "Meni ilk bor ko‘rganingizda xayolingizdan nima o‘tgan?",
+      "Mening qaysi harakatim seni darrov tabassum qildiradi?",
+      "Menga hali aytmagan kichik bir siringiz bormi?",
+      "Birgalikdagi eng sevimli xotirangiz qaysi?"
+    ];
+    const DARES = [
+      "Hozir shaxsiy chatga menga atab 3 ta samimiy iltifot yoz! 🩵",
+      "Playlistga men uchun bitta sevimli qo‘shiq yukla 🎧",
+      "Galereyaga bugungi kuningdan bitta rasm yukla 📸",
+      "Asosiy sahifada «Sog‘indim 🩵» signalini yubor!"
+    ];
+
+    // ==================== FULL I18N (UZ / RU / EN) ====================
+    const I18N = {
+      uz: {
+        appTitle: 'Juftlik Makoni', appSubtitle: 'Ikki qalb uchun yagona oq va havorang raqamli olam',
+        loginTab: 'Kirish', registerTab: 'Ro‘yxatdan o‘tish', loginLabel: 'Login yoki Email', phLoginIdent: 'Loginingiz yoki email...',
+        passwordLabel: 'Parol', forgotLink: 'Parolni unutdingizmi?', loginBtn: 'Kirish 🩵', firstName: 'Ismingiz', lastName: 'Familiyangiz',
+        emailLabel: 'Elektron pochta', getCode: 'Kod olish', enterCode: 'Pochtaga kelgan 6 xonali kod', otpHintText: 'Kod 10 daqiqa amal qiladi. Spam jildini ham tekshiring.',
+        createAccount: 'Profil yaratish ✨', recoverTitle: 'Parolni tiklash 🔑', btnBack: '← Orqaga', newPassLabel: 'Yangi parol', btnUpdatePass: 'Parolni yangilash ✅',
+        notPairedBadge: 'Juftlik ulanmagan', inviteTitle: 'Juftingizni makonga taklif qiling 🩵', inviteDesc: 'Shaxsiy kodingizni juftingizga yuboring yoki Profil orqali uning kodini ulang.',
+        copyBtn: 'Nusxalash', togetherTime: 'Birga bo‘lgan vaqtimiz ✨', changeDate: 'Sanani o‘zgartirish', days: 'Kun', hours: 'Soat', minutes: 'Daqiqa', seconds: 'Soniya',
+        missYouTitle: 'Mehr to‘lqini 💓', btnMissYouSend: 'Sog‘indim 🩵', liveMoodTitle: 'Jonli kayfiyatimiz 🌤', phCustomMood: 'O‘z kayfiyatingizni yozing...', btnUpdate: 'Yangilash',
+        statMedia: 'Media', statSongs: 'Musiqa', statScores: 'Ball', specialDatesTitle: 'Muhim sanalar & Taymer 📅', specialDatesSub: 'Unutilmas kunlar',
+        phSpecialDateTitle: 'Sana nomi (masalan: Tug‘ilgan kun, Uchrashuv)...', btnAdd: '+ Qo‘shish', sharedPlansTitle: 'Birgalikdagi rejalar & g‘oyalar ✨', phNewPlan: 'Yangi reja yozing...',
+        galleryTitle: 'Umumiy Galereya 🖼️', gallerySub: 'Rasm va videolar (har birida muallif ko‘rinadi)', btnUploadMedia: '+ Yuklash', filterAll: 'Barchasi', filterVideos: 'Videolar 🎬',
+        musicTitle: 'Musiqa & Playlistlar 🎧', musicSub: 'Shaxsiy va umumiy playlistlar', btnUploadSong: '+ Qo‘shiq',
+        capsuleTitle: '⏳ Vaqt Kapsulasi (Kelajakka Xat)', capsuleSub: 'Belgilangan sanagacha yopiq turadigan maxfiy maktub', btnWriteCapsule: '+ Xat yozish',
+        phCapsuleTitle: 'Maktub sarlavhasi...', phCapsuleBody: 'Kelajakda ochiladigan samimiy so‘zlaringiz...', labelUnlockDate: 'Qachon ochilsin?', btnSealCapsule: 'Muhrlash 🔒',
+        secretQTitle: 'Kunlik Sirli Savol 🔐', btnPlusQuestion: '+ Savol', btnNextArrow: 'Keyingi →', chatTitle: 'Shaxsiy Suhbat 💬', phChatMsg: 'Xabar yozing...', btnSend: 'Yuborish',
+        gamesLeaderboardTitle: '🏆 Juftlik o‘yin reytingi', game1Title: '💡 1. Juftlik Viktorinasi (+10)', game2Title: '🤔 2. Kim ko‘proq...? (+5 ball)',
+        game3Title: '🎲 3. Haqiqat yoki Vazifa (+15)', btnTruth: 'Haqiqat 🩵', btnDare: 'Vazifa ✨', todPickPrompt: 'Yuqoridan «Haqiqat 🩵» yoki «Vazifa ✨» tugmasini bosing!',
+        btnTodClaim: 'Bajardim! (+15 ball) ✅', game4Title: '🃏 4. Xotira Juftligi 4×4 (+25 ball)', btnResetMemory: 'Qayta ↻',
+        distanceTabTitle: 'Bizning masofamiz 📍', distanceTabDesc: 'Faqat ilovaga kirganda bir marta va ikki tomonlama rozilik bilan yangilanadi (fon GPS yo‘q).',
+        straightLineLabel: 'Taxminiy to‘g‘ri chiziq masofasi', yourLocationLabel: 'Sizning joylashuvingiz', partnerLocationLabel: 'Juftingiz joylashuvi',
+        navHome: 'Asosiy', navGallery: 'Galereya', navMusic: 'Musiqa', navChat: 'Suhbat', navGames: 'O‘yinlar', navDistance: 'Masofa',
+        btnCancel: 'Bekor qilish', btnDeleteConfirm: 'O‘chirish 🗑️', profileModalTitle: 'Profil va Sozlamalar ⚙️',
+        todayLabel: 'Bugun', totalLabel: 'Jami', pointsUnit: 'ball', daysLeft: 'kun qoldi', daysAgo: 'kun o‘tdi', todayCelebration: 'Bugun! 🎉',
+        wClear: 'Ochiq osmon', wPartly: 'Qisman bulutli', wCloudy: 'Bulutli', wFog: 'Tuman', wRain: 'Yomg‘ir', wSnow: 'Qor', wStorm: 'Momaqaldiroq',
+        moodPresets: ['Sog‘indim 🩵', 'Seni o‘ylayapman 🤍', 'Uchrashuvni kutyapman ✨', 'Musiqa tinglayapman 🎧', 'Baxtliman 😊', 'Ishdaman 💼', 'Kofe ichyapman ☕']
+      },
+      ru: {
+        appTitle: 'Пространство Пары', appSubtitle: 'Единый бело-голубой цифровой мир для двух сердец',
+        loginTab: 'Вход', registerTab: 'Регистрация', loginLabel: 'Логин или Email', phLoginIdent: 'Ваш логин или email...',
+        passwordLabel: 'Пароль', forgotLink: 'Забыли пароль?', loginBtn: 'Войти 🩵', firstName: 'Имя', lastName: 'Фамилия',
+        emailLabel: 'Электронная почта', getCode: 'Получить код', enterCode: '6-значный код с почты', otpHintText: 'Код действителен 10 минут. Проверьте папку Спам.',
+        createAccount: 'Создать профиль ✨', recoverTitle: 'Восстановление пароля 🔑', btnBack: '← Назад', newPassLabel: 'Новый пароль', btnUpdatePass: 'Обновить пароль ✅',
+        notPairedBadge: 'Пара не подключена', inviteTitle: 'Пригласите вторую половинку 🩵', inviteDesc: 'Отправьте свой код партнёру или введите его код в Профиле.',
+        copyBtn: 'Копировать', togetherTime: 'Мы вместе уже ✨', changeDate: 'Изменить дату', days: 'Дней', hours: 'Часов', minutes: 'Минут', seconds: 'Секунд',
+        missYouTitle: 'Волна нежности 💓', btnMissYouSend: 'Скучаю 🩵', liveMoodTitle: 'Наше настроение 🌤', phCustomMood: 'Напишите своё настроение...', btnUpdate: 'Обновить',
+        statMedia: 'Медиа', statSongs: 'Музыка', statScores: 'Очки', specialDatesTitle: 'Важные даты & Таймер 📅', specialDatesSub: 'Особенные дни',
+        phSpecialDateTitle: 'Название (День рождения, Годовщина)...', btnAdd: '+ Добавить', sharedPlansTitle: 'Совместные планы и идеи ✨', phNewPlan: 'Новый план...',
+        galleryTitle: 'Общая Галерея 🖼️', gallerySub: 'Фото и видео с указанием автора', btnUploadMedia: '+ Загрузить', filterAll: 'Все', filterVideos: 'Видео 🎬',
+        musicTitle: 'Музыка и Плейлисты 🎧', musicSub: 'Личные и общие плейлисты', btnUploadSong: '+ Песня',
+        capsuleTitle: '⏳ Капсула Времени (Письмо)', capsuleSub: 'Письмо откроется в выбранную дату', btnWriteCapsule: '+ Написать',
+        phCapsuleTitle: 'Заголовок письма...', phCapsuleBody: 'Тёплые слова в будущее...', labelUnlockDate: 'Дата открытия', btnSealCapsule: 'Запечатать 🔒',
+        secretQTitle: 'Секретный вопрос дня 🔐', btnPlusQuestion: '+ Вопрос', btnNextArrow: 'Далее →', chatTitle: 'Личный Чат 💬', phChatMsg: 'Напишите сообщение...', btnSend: 'Отправить',
+        gamesLeaderboardTitle: '🏆 Рейтинг игр пары', game1Title: '💡 1. Викторина (+10)', game2Title: '🤔 2. Кто скорее всего...? (+5)',
+        game3Title: '🎲 3. Правда или Действие (+15)', btnTruth: 'Правда 🩵', btnDare: 'Действие ✨', todPickPrompt: 'Нажмите «Правда 🩵» или «Действие ✨» выше!',
+        btnTodClaim: 'Выполнено! (+15 очк.) ✅', game4Title: '🃏 4. Найди пару 4×4 (+25 очк.)', btnResetMemory: 'Заново ↻',
+        distanceTabTitle: 'Наше расстояние 📍', distanceTabDesc: 'Обновляется один раз при входе с согласия обеих сторон (без фонового GPS).',
+        straightLineLabel: 'Примерное расстояние по прямой', yourLocationLabel: 'Ваше местоположение', partnerLocationLabel: 'Местоположение партнёра',
+        navHome: 'Главная', navGallery: 'Галерея', navMusic: 'Музыка', navChat: 'Чат', navGames: 'Игры', navDistance: 'Дист.',
+        btnCancel: 'Отмена', btnDeleteConfirm: 'Удалить 🗑️', profileModalTitle: 'Профиль и Настройки ⚙️',
+        todayLabel: 'Сегодня', totalLabel: 'Всего', pointsUnit: 'очк.', daysLeft: 'дн. ост.', daysAgo: 'дн. назад', todayCelebration: 'Сегодня! 🎉',
+        wClear: 'Ясно', wPartly: 'Переменная облачность', wCloudy: 'Облачно', wFog: 'Туман', wRain: 'Дождь', wSnow: 'Снег', wStorm: 'Гроза',
+        moodPresets: ['Скучаю 🩵', 'Думаю о тебе 🤍', 'Жду встречи ✨', 'Слушаю музыку 🎧', 'Счастлив(а) 😊', 'На работе 💼', 'Пью кофе ☕']
+      },
+      en: {
+        appTitle: 'Couple Space', appSubtitle: 'A white & sky-blue digital sanctuary for two hearts',
+        loginTab: 'Sign In', registerTab: 'Sign Up', loginLabel: 'Username or Email', phLoginIdent: 'Username or email...',
+        passwordLabel: 'Password', forgotLink: 'Forgot password?', loginBtn: 'Sign In 🩵', firstName: 'First Name', lastName: 'Last Name',
+        emailLabel: 'Email Address', getCode: 'Get Code', enterCode: '6-digit email code', otpHintText: 'Valid for 10 minutes. Check Spam folder too.',
+        createAccount: 'Create Account ✨', recoverTitle: 'Reset Password 🔑', btnBack: '← Back', newPassLabel: 'New Password', btnUpdatePass: 'Update Password ✅',
+        notPairedBadge: 'Partner Not Linked', inviteTitle: 'Invite Your Partner 🩵', inviteDesc: 'Share your invite code or enter theirs in Profile.',
+        copyBtn: 'Copy', togetherTime: 'Time Together ✨', changeDate: 'Change Date', days: 'Days', hours: 'Hours', minutes: 'Mins', seconds: 'Secs',
+        missYouTitle: 'Love Pulse 💓', btnMissYouSend: 'Miss You 🩵', liveMoodTitle: 'Live Mood 🌤', phCustomMood: 'Type your custom mood...', btnUpdate: 'Update',
+        statMedia: 'Media', statSongs: 'Music', statScores: 'Points', specialDatesTitle: 'Important Dates & Countdown 📅', specialDatesSub: 'Milestones',
+        phSpecialDateTitle: 'Title (Birthday, Anniversary)...', btnAdd: '+ Add', sharedPlansTitle: 'Shared Plans & Ideas ✨', phNewPlan: 'Write a new plan...',
+        galleryTitle: 'Shared Gallery 🖼️', gallerySub: 'Photos & videos with author labels', btnUploadMedia: '+ Upload', filterAll: 'All', filterVideos: 'Videos 🎬',
+        musicTitle: 'Music & Playlists 🎧', musicSub: 'Personal & shared playlists', btnUploadSong: '+ Song',
+        capsuleTitle: '⏳ Time Capsule (Future Letter)', capsuleSub: 'Sealed letter that unlocks on a future date', btnWriteCapsule: '+ Write',
+        phCapsuleTitle: 'Letter title...', phCapsuleBody: 'Heartfelt message to the future...', labelUnlockDate: 'Unlock Date', btnSealCapsule: 'Seal 🔒',
+        secretQTitle: 'Daily Secret Question 🔐', btnPlusQuestion: '+ Question', btnNextArrow: 'Next →', chatTitle: 'Private Chat 💬', phChatMsg: 'Write a message...', btnSend: 'Send',
+        gamesLeaderboardTitle: '🏆 Couple Games Scoreboard', game1Title: '💡 1. Couple Quiz (+10)', game2Title: '🤔 2. Who’s More Likely? (+5)',
+        game3Title: '🎲 3. Truth or Dare (+15)', btnTruth: 'Truth 🩵', btnDare: 'Dare ✨', todPickPrompt: 'Tap «Truth 🩵» or «Dare ✨» above!',
+        btnTodClaim: 'Done! (+15 pts) ✅', game4Title: '🃏 4. Memory Match 4×4 (+25 pts)', btnResetMemory: 'Reset ↻',
+        distanceTabTitle: 'Our Distance 📍', distanceTabDesc: 'Updates once on active app entry with mutual consent (no background GPS).',
+        straightLineLabel: 'Approximate straight-line distance', yourLocationLabel: 'Your location', partnerLocationLabel: 'Partner location',
+        navHome: 'Home', navGallery: 'Gallery', navMusic: 'Music', navChat: 'Chat', navGames: 'Games', navDistance: 'Dist.',
+        btnCancel: 'Cancel', btnDeleteConfirm: 'Delete 🗑️', profileModalTitle: 'Profile & Settings ⚙️',
+        todayLabel: 'Today', totalLabel: 'Total', pointsUnit: 'pts', daysLeft: 'days left', daysAgo: 'days ago', todayCelebration: 'Today! 🎉',
+        wClear: 'Clear', wPartly: 'Partly cloudy', wCloudy: 'Cloudy', wFog: 'Fog', wRain: 'Rain', wSnow: 'Snow', wStorm: 'Thunderstorm',
+        moodPresets: ['Miss you 🩵', 'Thinking of you 🤍', 'Can’t wait ✨', 'Listening to music 🎧', 'Feeling happy 😊', 'At work 💼', 'Having coffee ☕']
+      }
+    };
+
+    function t(key) {
+      return (I18N[currentLang] && I18N[currentLang][key]) || I18N.uz[key] || key;
+    }
+
+    function setLanguage(lang) {
+      currentLang = ['uz', 'ru', 'en'].includes(lang) ? lang : 'uz';
+      localStorage.setItem('jm_lang', currentLang);
+      document.documentElement.lang = currentLang;
+
+      document.querySelectorAll('[data-lang-pill]').forEach(btn => {
+        const active = btn.getAttribute('data-lang-pill') === currentLang;
+        btn.className = active
+          ? 'px-2 py-0.5 rounded-full text-[10px] font-extrabold sky-gradient text-white shadow-xs transition'
+          : 'px-2 py-0.5 rounded-full text-[10px] font-extrabold text-slate-500 hover:text-sky-600 transition';
+      });
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        el.textContent = t(key);
+      });
+      document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+        const key = el.getAttribute('data-i18n-ph');
+        el.setAttribute('placeholder', t(key));
+      });
+      if (currentUser && spaceData) renderAllUI();
+    }
+
+    // ==================== SECURITY & HELPERS ====================
+    async function sha256Hex(rawText) {
+      const data = new TextEncoder().encode('jm_salt_2026_' + String(rawText));
+      const buf = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function showToast(text, icon = '🩵') {
+      const el = document.getElementById('toast');
+      document.getElementById('toastIcon').textContent = icon;
+      document.getElementById('toastText').textContent = text;
+      el.classList.remove('hidden'); el.classList.add('flex');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => { el.classList.add('hidden'); el.classList.remove('flex'); }, 3500);
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function safeMediaUrl(url) {
+      const s = String(url || '').trim();
+      if (s.startsWith('https://') || s.startsWith('data:image/') || s.startsWith('blob:')) return s;
+      return '';
+    }
+
+    function getTodayIsoDate() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function formatShortTime(isoStr) {
+      if (!isoStr) return '—';
+      const d = new Date(isoStr);
+      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} (${d.toLocaleDateString()})`;
+    }
+
+    function askConfirm(title, body, onYes) {
+      document.getElementById('confirmModalTitle').textContent = title;
+      document.getElementById('confirmModalBody').textContent = body;
+      document.getElementById('confirmModalProceedBtn').onclick = () => {
+        closeModal('customConfirmModal');
+        if (typeof onYes === 'function') onYes();
+      };
+      openFlexModal('customConfirmModal');
+    }
+
+    function isPrimarySlot() {
+      if (!currentUser || !partnerUser) return true;
+      return currentUser.id < partnerUser.id;
+    }
+
+    function getMySlotKey() {
+      return isPrimarySlot() ? 'p1' : 'p2';
+    }
+
+    function openFlexModal(id) {
+      const m = document.getElementById(id);
+      m.classList.remove('hidden'); m.classList.add('flex');
+    }
+
+    function closeModal(id) {
+      const m = document.getElementById(id);
+      m.classList.add('hidden'); m.classList.remove('flex');
+    }
+
+    // ==================== NON-DESTRUCTIVE MIGRATION V5 ====================
+    function migrateSpacePayload(raw, user) {
+      const p = raw && typeof raw === 'object' ? { ...raw } : {};
+      // Preserve both old number quizScore and per-partner {p1, p2}
+      let scoreObj = { p1: 0, p2: 0 };
+      if (typeof p.quizScore === 'number') {
+        scoreObj = { p1: p.quizScore, p2: 0 };
+      } else if (p.quizScore && typeof p.quizScore === 'object') {
+        scoreObj = { p1: Number(p.quizScore.p1 || 0), p2: Number(p.quizScore.p2 || 0) };
+      }
+
+      // Preserve legacy array names
+      const ideas = Array.isArray(p.sharedPlans) ? p.sharedPlans : (Array.isArray(p.ideas) ? p.ideas : []);
+      const dates = Array.isArray(p.specialDates) ? p.specialDates : (Array.isArray(p.importantDates) ? p.importantDates : []);
+      const msgs = Array.isArray(p.chatMessages) ? p.chatMessages : (Array.isArray(p.messages) ? p.messages : []);
+      const caps = Array.isArray(p.timeCapsules) ? p.timeCapsules : (Array.isArray(p.capsules) ? p.capsules : []);
+
+      const secretQs = (Array.isArray(p.secretQuestions) && p.secretQuestions.length)
+        ? p.secretQuestions
+        : JSON.parse(JSON.stringify(DEFAULT_SECRET_QUESTIONS));
+
+      const photos = (Array.isArray(p.photos) ? p.photos : []).map(item => ({
+        ...item,
+        id: item.id || ('ph_' + Date.now() + Math.random()),
+        url: item.url || item.src || '',
+        mediaType: item.mediaType || 'image',
+        category: item.category || 'Uchrashuvlar',
+        caption: item.caption || '',
+        author: item.author || (user ? user.first_name : ''),
+        likes: typeof item.likes === 'number' ? item.likes : 1
+      }));
+
+      const songs = (Array.isArray(p.songs) ? p.songs : []).map(s => ({
+        ...s,
+        id: s.id || ('song_' + Date.now() + Math.random()),
+        url: s.url || s.audioUrl || '',
+        playlist: s.playlist === 'Umumiy playlist' ? 'shared' : (s.playlist || 'shared')
+      }));
+
+      return {
+        schemaVersion: 5,
+        revision: typeof p.revision === 'number' ? p.revision : 1,
+        startDate: p.startDate || '',
+        dateSetBy: p.dateSetBy || p.startDateAuthor || '',
+        moods: p.moods || (user ? { [user.id]: t('moodPresets')[0] } : {}),
+        missYouPulses: Array.isArray(p.missYouPulses) ? p.missYouPulses : [],
+        specialDates: dates,
+        sharedPlans: ideas,
+        photos,
+        songs,
+        timeCapsules: caps,
+        secretQuestions: secretQs,
+        secretQuestionIdx: typeof p.secretQuestionIdx === 'number' ? p.secretQuestionIdx : 0,
+        chatMessages: msgs,
+        quizIdx: typeof p.quizIdx === 'number' ? p.quizIdx : 0,
+        quizScore: scoreObj,
+        whoMoreLikelyVotes: p.whoMoreLikelyVotes || {}
+      };
+    }
+
+    // ==================== EMAILJS OTP ====================
+    async function sendVerificationCode(flow) {
+      const emailInput = flow === 'register' ? document.getElementById('regEmail') : document.getElementById('forgotEmail');
+      const btn = flow === 'register' ? document.getElementById('sendRegCodeBtn') : document.getElementById('sendForgotCodeBtn');
+      const email = emailInput.value.trim().toLowerCase();
+      if (!email || !email.includes('@')) { showToast("To‘g‘ri elektron pochta kiriting!", "⚠️"); return; }
+
+      if (flow === 'forgot') {
+        const { data: ex } = await sb.from('app_users').select('id').eq('email', email).maybeSingle();
+        if (!ex) { showToast("Bu email bilan profil topilmadi!", "❌"); return; }
+      }
+
+      const code = String(Math.floor(100000 + Math.random() * 900000));
+      pendingAuthCodes[email] = { code, expires: Date.now() + 10 * 60 * 1000 };
+
+      btn.disabled = true; btn.textContent = '...';
+      try {
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_email: email, code });
+        if (flow === 'register') document.getElementById('regCodeWrapper').classList.remove('hidden');
+        else document.getElementById('forgotCodeWrapper').classList.remove('hidden');
+        showToast(`Tasdiqlash kodi ${email} pochtasiga yuborildi!`, "📩");
+      } catch (err) {
+        showToast("Pochtaga yuborishda xatolik!", "❌");
+      } finally {
+        btn.disabled = false; btn.textContent = t('getCode');
+      }
+    }
+
+    // ==================== AUTH ====================
+    function switchAuthTab(tab) {
+      ['loginForm', 'registerForm', 'forgotForm'].forEach(f => document.getElementById(f).classList.add('hidden'));
+      const lBtn = document.getElementById('tabLoginBtn');
+      const rBtn = document.getElementById('tabRegisterBtn');
+      if (tab === 'login') {
+        document.getElementById('loginForm').classList.remove('hidden');
+        lBtn.className = 'py-2.5 rounded-xl text-xs font-bold transition bg-white text-sky-600 shadow-sm';
+        rBtn.className = 'py-2.5 rounded-xl text-xs font-bold transition text-slate-500';
+      } else if (tab === 'register') {
+        document.getElementById('registerForm').classList.remove('hidden');
+        rBtn.className = 'py-2.5 rounded-xl text-xs font-bold transition bg-white text-sky-600 shadow-sm';
+        lBtn.className = 'py-2.5 rounded-xl text-xs font-bold transition text-slate-500';
+      } else {
+        document.getElementById('forgotForm').classList.remove('hidden');
+      }
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const firstName = document.getElementById('regFirstName').value.trim();
+      const lastName = document.getElementById('regLastName').value.trim();
+      const email = document.getElementById('regEmail').value.trim().toLowerCase();
+      const code = document.getElementById('regEmailCode').value.trim();
+      const username = document.getElementById('regUsername').value.trim().toLowerCase();
+      const rawPass = document.getElementById('regPassword').value.trim();
+
+      const rec = pendingAuthCodes[email];
+      if (!rec || rec.code !== code || Date.now() > rec.expires) {
+        showToast("6 xonali email kodi noto‘g‘ri yoki muddati tugagan!", "❌");
+        return;
+      }
+
+      const btn = document.getElementById('regSubmitBtn');
+      btn.disabled = true;
+      try {
+        const userId = 'usr_' + Date.now();
+        const inviteCode = 'LOVE-' + Math.floor(1000 + Math.random() * 9000);
+        const spaceKey = 'space_' + userId;
+        const passHash = await sha256Hex(rawPass);
+
+        const newUser = {
+          id: userId, first_name: firstName, last_name: lastName, email, username,
+          password: passHash, invite_code: inviteCode, partner_id: null, space_key: spaceKey,
+          role: email === SUPER_ADMIN_EMAIL ? 'super_admin' : 'user',
+          is_banned: false, last_seen_at: new Date().toISOString()
+        };
+
+        const { error } = await sb.from('app_users').insert(newUser);
+        if (error) { showToast("Xatolik: " + error.message, "❌"); return; }
+
+        const initialPayload = migrateSpacePayload({}, newUser);
+        await sb.from('couple_spaces').upsert({ space_key: spaceKey, payload: initialPayload, updated_at: new Date().toISOString() });
+
+        delete pendingAuthCodes[email];
+        delete newUser.password;
+        localStorage.setItem('jm_session_user_id', userId);
+        await bootUserSession(newUser);
+        showToast(`Xush kelibsiz, ${firstName}! 🩵`, "✨");
+      } finally { btn.disabled = false; }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const ident = document.getElementById('loginUsername').value.trim().toLowerCase();
+      const rawPass = document.getElementById('loginPassword').value.trim();
+      const hashedPass = await sha256Hex(rawPass);
+
+      const btn = document.getElementById('loginSubmitBtn');
+      btn.disabled = true;
+      try {
+        const { data: user } = await sb
+          .from('app_users')
+          .select('id, first_name, last_name, email, username, password, invite_code, partner_id, space_key, role, admin_permissions, is_banned, ban_reason, telegram_id, phone_verified, phone_masked, archive_pin_hash, archives')
+          .or(`username.eq.${ident},email.eq.${ident}`)
+          .maybeSingle();
+
+        if (!user) { showToast("Foydalanuvchi topilmadi!", "❌"); return; }
+        if (user.password !== hashedPass && user.password !== rawPass) { showToast("Parol noto‘g‘ri!", "❌"); return; }
+        if (user.is_banned) { showToast(`Hisob bloklangan: ${user.ban_reason || 'Qoidabuzarlik'}`, "🚫"); return; }
+
+        const updates = { last_seen_at: new Date().toISOString() };
+        if (user.password === rawPass) updates.password = hashedPass;
+        if (user.email === SUPER_ADMIN_EMAIL && user.role !== 'super_admin') updates.role = 'super_admin';
+        await sb.from('app_users').update(updates).eq('id', user.id);
+        Object.assign(user, updates);
+        delete user.password;
+
+        localStorage.setItem('jm_session_user_id', user.id);
+        await bootUserSession(user);
+        showToast(`Xush kelibsiz, ${user.first_name}! 🩵`, "🩵");
+      } finally { btn.disabled = false; }
+    }
+
+    async function handleResetPassword(e) {
+      e.preventDefault();
+      const email = document.getElementById('forgotEmail').value.trim().toLowerCase();
+      const code = document.getElementById('forgotCodeInput').value.trim();
+      const newPass = document.getElementById('forgotNewPassword').value.trim();
+      const rec = pendingAuthCodes[email];
+      if (!rec || rec.code !== code || Date.now() > rec.expires) { showToast("Tasdiqlash kodi noto‘g‘ri!", "❌"); return; }
+
+      const hashed = await sha256Hex(newPass);
+      const { error } = await sb.from('app_users').update({ password: hashed }).eq('email', email);
+      if (error) { showToast("Xatolik yuz berdi!", "❌"); return; }
+      delete pendingAuthCodes[email];
+      showToast("Parol yangilandi!", "✅");
+      switchAuthTab('login');
+    }
+
+    function logoutUser() {
+      clearInterval(backgroundPollInterval);
+      closeAudioPlayer();
+      localStorage.removeItem('jm_session_user_id');
+      currentUser = null; partnerUser = null; spaceData = null;
+      myLocationRow = null; partnerLocationRow = null; locationCheckedThisSession = false;
+      closeModal('profileModal');
+      document.getElementById('mainApp').classList.add('hidden');
+      document.getElementById('authScreen').classList.remove('hidden');
+    }
+
+    // ==================== BOOT & SILENT SYNC ====================
+    async function bootUserSession(user) {
+      currentUser = user;
+      partnerUser = null;
+
+      if (user.partner_id) {
+        const { data: pUser } = await sb.from('app_users').select('id, first_name, last_name, invite_code').eq('id', user.partner_id).maybeSingle();
+        if (pUser) partnerUser = pUser;
+      }
+
+      const spaceKey = user.space_key || ('space_' + user.id);
+      const { data: row } = await sb.from('couple_spaces').select('payload').eq('space_key', spaceKey).maybeSingle();
+      spaceData = migrateSpacePayload(row?.payload, user);
+      if (!row) {
+        await sb.from('couple_spaces').upsert({ space_key: spaceKey, payload: spaceData, updated_at: new Date().toISOString() });
+      }
+
+      lastSyncedHash = JSON.stringify(spaceData);
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+
+      initMemoryMatchGame();
+      await loadSystemAnnouncement();
+      await loadLocationRowsAndMaybeRefreshOnce();
+      renderAllUI();
+      startSilentBackgroundSync();
+    }
+
+    function triggerSilentSave() {
+      if (!currentUser || !spaceData) return;
+      spaceData.revision = (spaceData.revision || 1) + 1;
+      const spaceKey = currentUser.space_key || ('space_' + currentUser.id);
+      const serialized = JSON.stringify(spaceData);
+
+      clearTimeout(silentSyncTimer);
+      silentSyncTimer = setTimeout(async () => {
+        try {
+          await sb.from('couple_spaces').upsert({ space_key: spaceKey, payload: spaceData, updated_at: new Date().toISOString() });
+          lastSyncedHash = serialized;
+        } catch (err) {}
+      }, 900);
+    }
+
+    function startSilentBackgroundSync() {
+      clearInterval(backgroundPollInterval);
+      backgroundPollInterval = setInterval(async () => {
+        if (!currentUser) return;
+        try {
+          const { data: meFresh } = await sb
+            .from('app_users')
+            .select('id, partner_id, space_key, role, admin_permissions, is_banned, ban_reason, telegram_id, phone_verified, phone_masked')
+            .eq('id', currentUser.id)
+            .maybeSingle();
+
+          if (meFresh) {
+            if (meFresh.is_banned) { showToast("Hisobingiz bloklandi!", "🚫"); logoutUser(); return; }
+            Object.assign(currentUser, meFresh);
+            if (meFresh.partner_id && !partnerUser) {
+              const { data: pUser } = await sb.from('app_users').select('id, first_name, last_name, invite_code').eq('id', meFresh.partner_id).maybeSingle();
+              if (pUser) { partnerUser = pUser; showToast(`${partnerUser.first_name} makonga ulandi! 🩵`, "🎉"); }
+            } else if (!meFresh.partner_id && partnerUser) {
+              partnerUser = null; partnerLocationRow = null;
+            }
+          }
+
+          const spaceKey = currentUser.space_key || ('space_' + currentUser.id);
+          const { data: row } = await sb.from('couple_spaces').select('payload').eq('space_key', spaceKey).maybeSingle();
+          if (row && row.payload) {
+            const incomingHash = JSON.stringify(row.payload);
+            if (incomingHash !== lastSyncedHash) {
+              spaceData = migrateSpacePayload(row.payload, currentUser);
+              lastSyncedHash = incomingHash;
+              renderAllUI();
+            }
+          }
+
+          await fetchPartnerLocationIfConsented();
+          renderDistanceAndWeather();
+        } catch (e) {}
+      }, 6000);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden' && currentUser && spaceData) {
+        const spaceKey = currentUser.space_key || ('space_' + currentUser.id);
+        sb.from('couple_spaces').upsert({ space_key: spaceKey, payload: spaceData, updated_at: new Date().toISOString() });
+      } else if (document.visibilityState === 'visible' && currentUser && myLocationRow && myLocationRow.device_consent) {
+        captureCurrentPositionOnce(false);
+      }
+    });
+
+    // ==================== LOCATION (Telegram LocationManager + Geolocation + 15s Throttle + Open-Meteo 10m Cache + Haversine) ====================
+    function getDeviceLocationOnce() {
+      return new Promise((resolve, reject) => {
+        const manager = tg && tg.LocationManager;
+        if (manager && typeof manager.init === 'function' && typeof manager.getLocation === 'function') {
+          try {
+            manager.init(() => {
+              manager.getLocation(data => {
+                if (data && Number.isFinite(data.latitude) && Number.isFinite(data.longitude)) {
+                  resolve({ latitude: data.latitude, longitude: data.longitude });
+                } else {
+                  reject(new Error('permission'));
+                }
+              });
+            });
+            return;
+          } catch (e) {}
+        }
+        if (!navigator.geolocation) { reject(new Error('unavailable')); return; }
+        navigator.geolocation.getCurrentPosition(
+          pos => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+          err => reject(err),
+          { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 }
+        );
+      });
+    }
+
+    async function loadLocationRowsAndMaybeRefreshOnce() {
+      if (!currentUser) return;
+      const { data: myLoc } = await sb.from('user_locations').select('*').eq('user_id', currentUser.id).maybeSingle();
+      myLocationRow = myLoc || null;
+      await fetchPartnerLocationIfConsented();
+
+      if (!locationCheckedThisSession && myLocationRow && myLocationRow.device_consent === true) {
+        locationCheckedThisSession = true;
+        captureCurrentPositionOnce(false);
+      }
+    }
+
+    async function fetchPartnerLocationIfConsented() {
+      if (!partnerUser) { partnerLocationRow = null; return; }
+      const { data: pLoc } = await sb.from('user_locations').select('*').eq('user_id', partnerUser.id).eq('share_with_partner', true).maybeSingle();
+      partnerLocationRow = pLoc || null;
+    }
+
+    function requestSessionLocationWithConsent() {
+      captureCurrentPositionOnce(true);
+    }
+
+    async function captureCurrentPositionOnce(isExplicitClick) {
+      if (!isExplicitClick && Date.now() - lastLocationRefreshAt < 15000) return;
+      try {
+        const coords = await getDeviceLocationOnce();
+        lastLocationRefreshAt = Date.now();
+        const lat = Number(coords.latitude.toFixed(5));
+        const lon = Number(coords.longitude.toFixed(5));
+        const nowIso = new Date().toISOString();
+
+        const city = await resolveCityName(lat, lon);
+        const weather = await fetchOpenMeteoWeather(lat, lon);
+        const shareFlag = myLocationRow ? Boolean(myLocationRow.share_with_partner) : false;
+
+        const record = {
+          user_id: currentUser.id,
+          device_consent: true,
+          share_with_partner: shareFlag,
+          latitude: lat,
+          longitude: lon,
+          city_name: city,
+          weather_cache: weather,
+          weather_updated_at: weather ? nowIso : (myLocationRow?.weather_updated_at || null),
+          updated_at: nowIso
+        };
+
+        const { error } = await sb.from('user_locations').upsert(record);
+        if (!error) {
+          myLocationRow = record;
+          renderDistanceAndWeather();
+          if (isExplicitClick) showToast("Joylashuv va ob-havo yangilandi! 📍", "✅");
+        }
+      } catch (err) {
+        if (isExplicitClick) showToast("Joylashuvga ruxsat berilmadi yoki aniqlanmadi.", "⚠️");
+      }
+    }
+
+    async function togglePartnerLocationConsent(enabled) {
+      if (!myLocationRow || !myLocationRow.device_consent) {
+        document.getElementById('toggleShareWithPartner').checked = false;
+        showToast("Avval «Joylashuvimni ulashish» tugmasini bosing!", "⚠️");
+        return;
+      }
+      const { error } = await sb.from('user_locations').update({ share_with_partner: enabled, updated_at: new Date().toISOString() }).eq('user_id', currentUser.id);
+      if (!error) {
+        myLocationRow.share_with_partner = enabled;
+        renderDistanceAndWeather();
+        showToast(enabled ? "Juftingizga joylashuv ochiq 🩵" : "Juftingizga ko‘rsatish yopildi 🔒", "📍");
+      }
+    }
+
+    async function revokeAndDeleteMyLocation() {
+      await sb.from('user_locations').delete().eq('user_id', currentUser.id);
+      myLocationRow = null;
+      document.getElementById('toggleShareWithPartner').checked = false;
+      renderDistanceAndWeather();
+      showToast("Joylashuv ruxsati bekor qilindi va o‘chirildi.", "🗑️");
+    }
+
+    function computeHaversineKm(lat1, lon1, lat2, lon2) {
+      const toRad = d => (d * Math.PI) / 180;
+      const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+      return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    async function resolveCityName(lat, lon) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=${currentLang}`);
+        if (!res.ok) return 'Aniqlangan hudud';
+        const data = await res.json();
+        return data.address?.city || data.address?.town || data.address?.village || data.address?.state || 'Aniqlangan hudud';
+      } catch { return 'Aniqlangan hudud'; }
+    }
+
+    async function fetchOpenMeteoWeather(lat, lon) {
+      const cacheKey = `${lat.toFixed(2)},${lon.toFixed(2)}`;
+      const cached = WEATHER_CACHE.get(cacheKey);
+      if (cached && Date.now() - cached.cachedAt < 10 * 60 * 1000) return cached.data;
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation_probability,weather_code,wind_speed_10m&timezone=auto`;
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const json = await res.json();
+        if (!json.current) return null;
+        const weatherObj = {
+          temp: Math.round(json.current.temperature_2m),
+          feelsLike: Math.round(json.current.apparent_temperature ?? json.current.temperature_2m),
+          humidity: json.current.relative_humidity_2m ?? 0,
+          precipProb: json.current.precipitation_probability ?? 0,
+          wind: json.current.wind_speed_10m,
+          code: json.current.weather_code,
+          fetchedAt: new Date().toISOString()
+        };
+        WEATHER_CACHE.set(cacheKey, { data: weatherObj, cachedAt: Date.now() });
+        return weatherObj;
+      } catch { return null; }
+    }
+
+    function weatherMetaFromCode(code) {
+      const c = Number(code);
+      if (c === 0) return { icon: '☀️', text: t('wClear') };
+      if ([1, 2].includes(c)) return { icon: '⛅', text: t('wPartly') };
+      if (c === 3) return { icon: '☁️', text: t('wCloudy') };
+      if ([45, 48].includes(c)) return { icon: '🌫️', text: t('wFog') };
+      if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(c)) return { icon: '🌧️', text: t('wRain') };
+      if ([71, 73, 75, 85, 86].includes(c)) return { icon: '❄️', text: t('wSnow') };
+      if ([95, 96, 99].includes(c)) return { icon: '⛈️', text: t('wStorm') };
+      return { icon: '🌤️', text: t('wPartly') };
+    }
+
+    function renderDistanceAndWeather() {
+      const myCityEl = document.getElementById('myLocCityName');
+      const myBadgeEl = document.getElementById('myLocStatusBadge');
+      const myWeatherBox = document.getElementById('myWeatherBox');
+      const myUpdatedEl = document.getElementById('myLocUpdatedText');
+      const revokeBtn = document.getElementById('btnRevokeLocation');
+      const shareCheckbox = document.getElementById('toggleShareWithPartner');
+
+      if (myLocationRow && myLocationRow.device_consent) {
+        myCityEl.textContent = myLocationRow.city_name || 'Aniqlangan hudud';
+        myBadgeEl.textContent = myLocationRow.share_with_partner ? 'Juftga ochiq 🩵' : 'Faqat o‘zingizga 🔒';
+        myBadgeEl.className = 'px-2.5 py-1 rounded-full bg-sky-100 text-sky-700 text-[10px] font-bold';
+        myUpdatedEl.textContent = `Oxirgi yangilanish: ${formatShortTime(myLocationRow.updated_at)}`;
+        revokeBtn.classList.remove('hidden');
+        shareCheckbox.checked = Boolean(myLocationRow.share_with_partner);
+
+        if (myLocationRow.weather_cache) {
+          const w = myLocationRow.weather_cache;
+          const wm = weatherMetaFromCode(w.code);
+          myWeatherBox.classList.remove('hidden');
+          document.getElementById('myWeatherIcon').textContent = wm.icon;
+          document.getElementById('myWeatherTemp').textContent = `${w.temp}°C`;
+          document.getElementById('myWeatherDesc').textContent = wm.text;
+          document.getElementById('myWeatherMeta').textContent = `His: ${w.feelsLike ?? w.temp}°C • Namlik: ${w.humidity ?? 0}% • Shamol: ${w.wind} km/s • Kesh: ${formatShortTime(w.fetchedAt)}`;
+        } else { myWeatherBox.classList.add('hidden'); }
+      } else {
+        myCityEl.textContent = 'Aniqlanmagan';
+        myBadgeEl.textContent = 'O‘chirilgan';
+        myBadgeEl.className = 'px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold';
+        myUpdatedEl.textContent = 'Oxirgi yangilanish: hali yangilanmagan';
+        myWeatherBox.classList.add('hidden');
+        revokeBtn.classList.add('hidden');
+        shareCheckbox.checked = false;
+      }
+
+      const pCityEl = document.getElementById('partnerLocCityName');
+      const pBadgeEl = document.getElementById('partnerLocStatusBadge');
+      const pWeatherBox = document.getElementById('partnerWeatherBox');
+      const pUpdatedEl = document.getElementById('partnerLocUpdatedText');
+
+      if (!partnerUser) {
+        pCityEl.textContent = 'Juftingiz ulanmagan'; pBadgeEl.textContent = 'Yopiq';
+        pWeatherBox.classList.add('hidden'); pUpdatedEl.textContent = 'Oxirgi yangilanish: ma’lumot yo‘q';
+      } else if (partnerLocationRow && partnerLocationRow.share_with_partner) {
+        pCityEl.textContent = `${partnerUser.first_name} • ${partnerLocationRow.city_name || 'Aniqlangan'}`;
+        pBadgeEl.textContent = 'Ulashilgan 🩵'; pBadgeEl.className = 'px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold';
+        pUpdatedEl.textContent = `Oxirgi yangilanish: ${formatShortTime(partnerLocationRow.updated_at)}`;
+        if (partnerLocationRow.weather_cache) {
+          const pw = partnerLocationRow.weather_cache;
+          const pwm = weatherMetaFromCode(pw.code);
+          pWeatherBox.classList.remove('hidden');
+          document.getElementById('partnerWeatherIcon').textContent = pwm.icon;
+          document.getElementById('partnerWeatherTemp').textContent = `${pw.temp}°C`;
+          document.getElementById('partnerWeatherDesc').textContent = pwm.text;
+          document.getElementById('partnerWeatherMeta').textContent = `His: ${pw.feelsLike ?? pw.temp}°C • Namlik: ${pw.humidity ?? 0}% • Shamol: ${pw.wind} km/s`;
+        } else { pWeatherBox.classList.add('hidden'); }
+      } else {
+        pCityEl.textContent = `${partnerUser.first_name} (ulashmagan)`;
+        pBadgeEl.textContent = 'Yopiq 🔒'; pWeatherBox.classList.add('hidden');
+        pUpdatedEl.textContent = 'Juftingiz hali joylashuvini ulashmagan';
+      }
+
+      const distEl = document.getElementById('haversineResultDisplay');
+      const noteEl = document.getElementById('haversineStatusNote');
+      const statDist = document.getElementById('statDistance');
+
+      const myFresh = myLocationRow && myLocationRow.share_with_partner && (Date.now() - new Date(myLocationRow.updated_at).getTime() < 24 * 3600 * 1000);
+      const partnerFresh = partnerLocationRow && partnerLocationRow.share_with_partner && (Date.now() - new Date(partnerLocationRow.updated_at).getTime() < 24 * 3600 * 1000);
+
+      if (myFresh && partnerFresh) {
+        const km = computeHaversineKm(myLocationRow.latitude, myLocationRow.longitude, partnerLocationRow.latitude, partnerLocationRow.longitude);
+        const formatted = km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
+        distEl.textContent = formatted;
+        statDist.textContent = formatted;
+        noteEl.textContent = "Haversine formulasi bo‘yicha ikki nuqta orasidagi taxminiy to‘g‘ri chiziq masofasi (yo‘l masofasi emas).";
+      } else {
+        distEl.textContent = '— km';
+        statDist.textContent = '—';
+        noteEl.textContent = "Masofa ko‘rinishi uchun ikkala tomonning ham amaldagi va ulashishga ruxsatli joylashuvi talab etiladi.";
+      }
+    }
+
+    // ==================== TELEGRAM BOT LINKING & PHONE REQUEST ====================
+    function copyInviteCode() {
+      navigator.clipboard?.writeText(currentUser.invite_code);
+      showToast(`Kod nusxalandi: ${currentUser.invite_code}`, "📋");
+    }
+
+    function copyTelegramLinkCommand() {
+      const cmd = `/link ${currentUser.invite_code}`;
+      navigator.clipboard?.writeText(cmd);
+      showToast(cmd, "🤖");
+    }
+
+    async function autoLinkCurrentTelegramUser() {
+      const tgUser = tg?.initDataUnsafe?.user;
+      if (!currentUser || !tgUser?.id) return;
+      await sb.from('app_users').update({ telegram_id: tgUser.id, tg_username: tgUser.username || null }).eq('id', currentUser.id);
+      currentUser.telegram_id = tgUser.id;
+      renderAllUI();
+      showToast("Telegram akkaunt 1 bosishda ulandi! 🤖", "✅");
+    }
+
+    function requestTelegramPhoneContact() {
+      if (tg && typeof tg.requestContact === 'function') {
+        tg.requestContact(sent => {
+          showToast(sent ? "Kontakt so‘rovi Telegram botga yuborildi! 📱" : "Bekor qilindi.", sent ? "📩" : "ℹ️");
+        });
+      } else {
+        showToast("Raqam tasdiqlash uchun ilovani @" + TELEGRAM_BOT_USERNAME + " orqali oching.", "🤖");
+      }
+    }
+
+    async function deleteSavedPhone() {
+      await sb.from('app_users').update({ phone_verified: false, phone_masked: null, phone_hash: null }).eq('id', currentUser.id);
+      currentUser.phone_verified = false; currentUser.phone_masked = null;
+      renderAllUI();
+      showToast("Telefon raqam o‘chirildi.", "🗑️");
+    }
+
+    // ==================== PAIRING & SHA-256 PIN MULTI-TAB ARCHIVE VAULT ====================
+    async function connectPartnerByCode() {
+      const code = document.getElementById('partnerCodeInput').value.trim().toUpperCase();
+      if (!code || code === currentUser.invite_code) { showToast("To‘g‘ri LOVE-XXXX kodini kiriting!", "⚠️"); return; }
+
+      const { data: target } = await sb.from('app_users').select('id, first_name, last_name, invite_code, partner_id, space_key').eq('invite_code', code).maybeSingle();
+      if (!target) { showToast("Kod topilmadi!", "❌"); return; }
+      if (target.partner_id && target.partner_id !== currentUser.id) { showToast("Bu foydalanuvchi band!", "⚠️"); return; }
+
+      const sharedKey = [currentUser.id, target.id].sort().join('__');
+      const { data: targetRow } = await sb.from('couple_spaces').select('payload').eq('space_key', target.space_key || ('space_' + target.id)).maybeSingle();
+      const targetPayload = migrateSpacePayload(targetRow?.payload, target);
+
+      const merged = migrateSpacePayload({
+        ...targetPayload,
+        startDate: targetPayload.startDate || spaceData.startDate,
+        dateSetBy: targetPayload.dateSetBy || spaceData.dateSetBy,
+        moods: { ...targetPayload.moods, ...spaceData.moods },
+        missYouPulses: [...targetPayload.missYouPulses, ...spaceData.missYouPulses],
+        specialDates: [...targetPayload.specialDates, ...spaceData.specialDates],
+        sharedPlans: [...targetPayload.sharedPlans, ...spaceData.sharedPlans],
+        photos: [...targetPayload.photos, ...spaceData.photos],
+        songs: [...targetPayload.songs, ...spaceData.songs],
+        timeCapsules: [...targetPayload.timeCapsules, ...spaceData.timeCapsules],
+        chatMessages: [...targetPayload.chatMessages, ...spaceData.chatMessages]
+      }, currentUser);
+
+      await sb.from('couple_spaces').upsert({ space_key: sharedKey, payload: merged, updated_at: new Date().toISOString() });
+      await sb.from('app_users').update({ partner_id: target.id, space_key: sharedKey }).eq('id', currentUser.id);
+      await sb.from('app_users').update({ partner_id: currentUser.id, space_key: sharedKey }).eq('id', target.id);
+
+      currentUser.partner_id = target.id; currentUser.space_key = sharedKey;
+      partnerUser = target; spaceData = merged; lastSyncedHash = JSON.stringify(spaceData);
+
+      closeModal('profileModal');
+      await fetchPartnerLocationIfConsented();
+      renderAllUI();
+      showToast(`${partnerUser.first_name} bilan Juftlik Makoni ulandi! 🩵`, "🎉");
+    }
+
+    function openArchivePinPrompt(mode) {
+      currentPinModalMode = mode;
+      const hasPin = Boolean(currentUser.archive_pin_hash);
+      document.getElementById('archivePinInput').value = '';
+      document.getElementById('archivePinConfirmInput').value = '';
+      document.getElementById('archivePinErrorText').classList.add('hidden');
+      document.getElementById('archivePinIcon').textContent = mode === 'archive' ? '📦' : '🔐';
+      document.getElementById('archivePinModalTitle').textContent = mode === 'archive' ? 'Munosabatni arxivlash 📦' : 'Shaxsiy Arxiv 🔐';
+      document.getElementById('archivePinModalDesc').textContent = hasPin
+        ? 'Tasdiqlash uchun 4 xonali PIN-kodingizni kiriting:'
+        : 'Shaxsiy arxivingiz uchun 4 xonali yangi PIN-kod yarating:';
+      document.getElementById('archivePinConfirmInput').classList.toggle('hidden', hasPin);
+      openFlexModal('archivePinModal');
+    }
+
+    async function submitArchivePinAction() {
+      const pin = document.getElementById('archivePinInput').value.trim();
+      const conf = document.getElementById('archivePinConfirmInput').value.trim();
+      const errEl = document.getElementById('archivePinErrorText');
+
+      if (!/^\d{4}$/.test(pin)) {
+        errEl.textContent = 'Aniq 4 ta raqam kiriting!'; errEl.classList.remove('hidden'); return;
+      }
+
+      const enteredHash = await sha256Hex(pin);
+      if (!currentUser.archive_pin_hash) {
+        if (pin !== conf) { errEl.textContent = 'PIN-kodlar mos kelmadi!'; errEl.classList.remove('hidden'); return; }
+        await sb.from('app_users').update({ archive_pin_hash: enteredHash }).eq('id', currentUser.id);
+        currentUser.archive_pin_hash = enteredHash;
+      } else if (currentUser.archive_pin_hash !== enteredHash) {
+        errEl.textContent = 'PIN-kod noto‘g‘ri!'; errEl.classList.remove('hidden'); return;
+      }
+
+      closeModal('archivePinModal');
+      if (currentPinModalMode === 'view') {
+        closeModal('profileModal');
+        openPersonalArchiveVault();
+      } else {
+        await executeArchiveAndUnlink();
+      }
+    }
+
+    async function executeArchiveAndUnlink() {
+      const daysCount = spaceData.startDate ? Math.max(0, Math.floor((Date.now() - new Date(spaceData.startDate).getTime()) / 86400000)) : 0;
+      const entry = {
+        id: 'arc_' + Date.now(),
+        archivedAt: new Date().toISOString(),
+        partnerName: partnerUser ? `${partnerUser.first_name} ${partnerUser.last_name}` : 'Oldingi juftlik',
+        startDate: spaceData.startDate || null,
+        endDate: getTodayIsoDate(),
+        daysCount,
+        snapshot: JSON.parse(JSON.stringify(spaceData))
+      };
+
+      const archives = Array.isArray(currentUser.archives) ? [entry, ...currentUser.archives] : [entry];
+      const newInviteCode = 'LOVE-' + Math.floor(1000 + Math.random() * 9000);
+      const newSpaceKey = 'space_' + currentUser.id + '_' + Date.now();
+      const freshSpace = migrateSpacePayload({}, currentUser);
+
+      if (partnerUser) await sb.from('app_users').update({ partner_id: null }).eq('id', partnerUser.id);
+      await sb.from('user_locations').update({ share_with_partner: false }).eq('user_id', currentUser.id);
+
+      await sb.from('app_users').update({
+        partner_id: null, invite_code: newInviteCode, space_key: newSpaceKey, archives
+      }).eq('id', currentUser.id);
+      await sb.from('couple_spaces').upsert({ space_key: newSpaceKey, payload: freshSpace, updated_at: new Date().toISOString() });
+
+      currentUser.partner_id = null; currentUser.invite_code = newInviteCode; currentUser.space_key = newSpaceKey; currentUser.archives = archives;
+      partnerUser = null; partnerLocationRow = null; spaceData = freshSpace;
+
+      closeModal('profileModal');
+      renderAllUI();
+      showToast("Xotiralar shaxsiy arxivga saqlandi va yangi kod berildi! 🔐", "✅");
+    }
+
+    function openPersonalArchiveVault() {
+      document.getElementById('archiveListContainer').classList.remove('hidden');
+      document.getElementById('archiveDetailContainer').classList.add('hidden');
+      const box = document.getElementById('archiveListContainer');
+      const list = currentUser.archives || [];
+      if (!list.length) {
+        box.innerHTML = `<div class="text-center py-10 text-xs text-slate-400">Hali arxivlangan munosabatlar yo‘q 📦</div>`;
+      } else {
+        box.innerHTML = list.map((a, idx) => `
+          <div onclick="openSingleArchiveDetail(${idx})" class="p-3.5 rounded-2xl sky-soft border border-sky-200 cursor-pointer space-y-1">
+            <div class="flex justify-between font-extrabold text-xs text-slate-900">
+              <span>🩵 ${escapeHtml(a.partnerName)}</span>
+              <span class="text-sky-700">${a.daysCount || 0} ${t('days')}</span>
+            </div>
+            <div class="text-[10px] text-slate-500">${a.startDate ? escapeHtml(a.startDate.slice(0, 10)) : '—'} → ${escapeHtml(a.endDate || '—')}</div>
+            <div class="text-[10px] text-sky-700 font-bold pt-0.5">🖼️ ${(a.snapshot?.photos || []).length} • 🎧 ${(a.snapshot?.songs || []).length} • 💬 ${(a.snapshot?.chatMessages || a.snapshot?.messages || []).length}</div>
+          </div>
+        `).join('');
+      }
+      openFlexModal('archiveVaultModal');
+    }
+
+    function backToArchiveList() {
+      document.getElementById('archiveDetailContainer').classList.add('hidden');
+      document.getElementById('archiveListContainer').classList.remove('hidden');
+    }
+
+    function openSingleArchiveDetail(idx) {
+      const arc = (currentUser.archives || [])[idx];
+      if (!arc) return;
+      activeArchiveDetailObj = arc;
+      document.getElementById('archiveListContainer').classList.add('hidden');
+      document.getElementById('archiveDetailContainer').classList.remove('hidden');
+      document.getElementById('archiveDetailHeader').innerHTML = `
+        <div class="flex justify-between font-extrabold text-slate-900"><span>🩵 ${escapeHtml(arc.partnerName)}</span><span class="text-sky-700">${arc.daysCount || 0} ${t('days')}</span></div>
+        <div class="text-[10px] text-slate-500">${arc.startDate ? escapeHtml(arc.startDate.slice(0, 10)) : '—'} → ${escapeHtml(arc.endDate || '—')}</div>
+      `;
+      switchArchiveDetailTab('media');
+    }
+
+    function switchArchiveDetailTab(subTab) {
+      ['media', 'music', 'chat', 'notes'].forEach(tb => {
+        document.getElementById('arcTab-' + tb).className = tb === subTab ? 'py-1.5 rounded-lg bg-white text-sky-600 shadow-xs' : 'py-1.5 rounded-lg text-slate-500';
+      });
+      const body = document.getElementById('archiveDetailBody');
+      const snap = activeArchiveDetailObj?.snapshot || {};
+
+      if (subTab === 'media') {
+        const photos = snap.photos || [];
+        body.innerHTML = photos.length
+          ? `<div class="grid grid-cols-2 gap-2">${photos.map(p => {
+              const u = safeMediaUrl(p.url || p.src);
+              return `<div class="rounded-xl overflow-hidden border border-sky-100 bg-sky-50/40">${p.mediaType === 'video' ? `<video src="${u}" controls class="w-full h-24 object-cover bg-slate-900"></video>` : `<img src="${u}" class="w-full h-24 object-cover" />`}<div class="p-1.5 text-[10px] truncate font-bold">${escapeHtml(p.caption)}</div></div>`;
+            }).join('')}</div>`
+          : `<div class="text-center py-6 text-xs text-slate-400">—</div>`;
+      } else if (subTab === 'music') {
+        const songs = snap.songs || [];
+        body.innerHTML = songs.length
+          ? songs.map(s => `<div class="p-2.5 rounded-xl bg-sky-50 border border-sky-100 text-xs font-bold">🎵 ${escapeHtml(s.title)} <span class="text-slate-500 font-normal">(${escapeHtml(s.artist)})</span></div>`).join('')
+          : `<div class="text-center py-6 text-xs text-slate-400">—</div>`;
+      } else if (subTab === 'chat') {
+        const msgs = snap.chatMessages || snap.messages || [];
+        body.innerHTML = msgs.length
+          ? msgs.map(m => `<div class="p-2.5 rounded-xl bg-sky-50 border border-sky-100 text-xs"><div class="text-[10px] font-bold text-sky-700">${escapeHtml(m.senderName || m.author)} • ${escapeHtml(m.time || '')}</div><div>${escapeHtml(m.text)}</div></div>`).join('')
+          : `<div class="text-center py-6 text-xs text-slate-400">—</div>`;
+      } else {
+        const plans = snap.sharedPlans || snap.ideas || [];
+        const caps = snap.timeCapsules || snap.capsules || [];
+        body.innerHTML = (plans.length || caps.length)
+          ? [
+              ...plans.map(p => `<div class="p-2.5 rounded-xl bg-sky-50 border border-sky-100 text-xs">${p.done ? '✅' : '⬜'} ${escapeHtml(p.text)}</div>`),
+              ...caps.map(c => `<div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs"><b>💌 ${escapeHtml(c.title || 'Xat')}:</b> ${escapeHtml(c.text || c.message)}</div>`)
+            ].join('')
+          : `<div class="text-center py-6 text-xs text-slate-400">—</div>`;
+      }
+    }
+
+    // ==================== RENDER ALL UI ====================
+    function renderAllUI() {
+      if (!currentUser || !spaceData) return;
+
+      const isAdmin = currentUser.role === 'super_admin' || currentUser.role === 'admin' || currentUser.email === SUPER_ADMIN_EMAIL;
+      document.getElementById('adminHeaderBtn').classList.toggle('hidden', !isAdmin);
+
+      const pairingBanner = document.getElementById('pairingBanner');
+      if (partnerUser) {
+        document.getElementById('headerCoupleTitle').textContent = `${currentUser.first_name} & ${partnerUser.first_name} 🩵`;
+        document.getElementById('headerSubtitle').textContent = 'Umumiy juftlik makoni';
+        pairingBanner.classList.add('hidden');
+        document.getElementById('btnEndRelationshipArchive').classList.remove('hidden');
+      } else {
+        document.getElementById('headerCoupleTitle').textContent = currentUser.first_name;
+        document.getElementById('headerSubtitle').textContent = 'Juftingiz kutilmoqda...';
+        document.getElementById('bannerInviteCode').textContent = currentUser.invite_code;
+        pairingBanner.classList.remove('hidden');
+        document.getElementById('btnEndRelationshipArchive').classList.add('hidden');
+      }
+
+      // Profile Info
+      document.getElementById('profFullName').textContent = `${currentUser.first_name} ${currentUser.last_name}`;
+      document.getElementById('profEmail').textContent = currentUser.email;
+      document.getElementById('profRoleBadge').textContent = (currentUser.role || 'USER').toUpperCase();
+      document.getElementById('profInviteCode').textContent = currentUser.invite_code;
+      document.getElementById('profPartnerStatus').textContent = partnerUser ? `${partnerUser.first_name} ${partnerUser.last_name} ✅` : 'Ulanmagan';
+      document.getElementById('connectPartnerSection').classList.toggle('hidden', Boolean(partnerUser));
+
+      // Telegram Bot Link Card
+      document.getElementById('tgLinkCommandText').textContent = `/link ${currentUser.invite_code}`;
+      const tgBadge = document.getElementById('tgBotStatusBadge');
+      const tgCmdBox = document.getElementById('tgLinkCommandBox');
+      const tgAutoBtn = document.getElementById('btnAutoLinkTgWebApp');
+      if (currentUser.telegram_id) {
+        tgBadge.textContent = `Ulangan ✅`;
+        tgBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700';
+        tgCmdBox.classList.add('hidden'); tgAutoBtn.classList.add('hidden');
+      } else {
+        tgBadge.textContent = 'Ulanmagan';
+        tgBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700';
+        tgCmdBox.classList.remove('hidden');
+        tgAutoBtn.classList.toggle('hidden', !tg?.initDataUnsafe?.user?.id);
+      }
+
+      if (currentUser.phone_verified && currentUser.phone_masked) {
+        document.getElementById('profPhoneStatus').textContent = `${currentUser.phone_masked} ✅`;
+        document.getElementById('btnDeletePhone').classList.remove('hidden');
+      } else {
+        document.getElementById('profPhoneStatus').textContent = 'Ulashilmagan';
+        document.getElementById('btnDeletePhone').classList.add('hidden');
+      }
+
+      document.getElementById('startDateLabel').textContent = spaceData.startDate ? `Boshlanish sanasi: ${spaceData.startDate.slice(0, 10)}` : 'Boshlanish sanasi: belgilanmagan';
+      document.getElementById('dateAuthorLabel').textContent = spaceData.dateSetBy ? `(${spaceData.dateSetBy})` : '';
+
+      const p1Pts = spaceData.quizScore?.p1 || 0;
+      const p2Pts = spaceData.quizScore?.p2 || 0;
+      const totalPts = p1Pts + p2Pts;
+      document.getElementById('statPhotos').textContent = (spaceData.photos || []).length;
+      document.getElementById('statSongs').textContent = (spaceData.songs || []).length;
+      document.getElementById('statGames').textContent = totalPts;
+
+      renderMissYouPulses();
+      renderMoods();
+      renderSpecialDates();
+      renderIdeas();
+      renderGallery();
+      renderMusic();
+      renderCapsules();
+      renderChatAndSecretQuestion();
+      renderGamesAll();
+      renderDistanceAndWeather();
+    }
+
+    // ==================== HOME MODULES (COUNTER, PULSES, MOODS, SPECIAL DATES, PLANS) ====================
+    setInterval(() => {
+      if (!spaceData || !spaceData.startDate) return;
+      const start = new Date(spaceData.startDate.slice(0, 10) + 'T00:00:00');
+      const diff = Math.max(0, Date.now() - start.getTime());
+      document.getElementById('daysCount').textContent = Math.floor(diff / 86400000);
+      document.getElementById('hoursCount').textContent = Math.floor((diff / 3600000) % 24);
+      document.getElementById('minutesCount').textContent = Math.floor((diff / 60000) % 60);
+      document.getElementById('secondsCount').textContent = Math.floor((diff / 1000) % 60);
+    }, 1000);
+
+    function openDateModal() {
+      document.getElementById('relationshipDateInput').value = (spaceData.startDate || '').slice(0, 10);
+      openFlexModal('dateModal');
+    }
+
+    function saveRelationshipDate() {
+      const val = document.getElementById('relationshipDateInput').value;
+      if (!val) return;
+      spaceData.startDate = val;
+      spaceData.dateSetBy = currentUser.first_name;
+      closeModal('dateModal');
+      renderAllUI();
+      triggerSilentSave();
+    }
+
+    function sendMissYouPulse(ev) {
+      const icons = ['🩵', '💙', '✨', '🤍', '💓'];
+      const rect = ev?.currentTarget?.getBoundingClientRect() || { left: window.innerWidth * 0.6, top: 260, width: 100 };
+      for (let i = 0; i < 7; i++) {
+        const el = document.createElement('div');
+        el.className = 'floating-heart';
+        el.textContent = icons[i % icons.length];
+        el.style.left = Math.round(rect.left + rect.width / 2 + (Math.random() - 0.5) * 85) + 'px';
+        el.style.top = Math.round(rect.top - 6) + 'px';
+        el.style.animationDelay = (i * 0.07) + 's';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1450);
+      }
+
+      spaceData.missYouPulses.push({
+        id: Date.now(),
+        bySlot: getMySlotKey(),
+        byName: currentUser.first_name,
+        dateStr: getTodayIsoDate(),
+        timeStr: new Date().toTimeString().slice(0, 5)
+      });
+      if (spaceData.missYouPulses.length > 400) spaceData.missYouPulses = spaceData.missYouPulses.slice(-400);
+      if (!spaceData.moods) spaceData.moods = {};
+      spaceData.moods[currentUser.id] = t('moodPresets')[0];
+
+      renderAllUI();
+      triggerSilentSave();
+      showToast(t('moodPresets')[0], "💓");
+    }
+
+    function renderMissYouPulses() {
+      const p1Name = isPrimarySlot() ? currentUser.first_name : (partnerUser ? partnerUser.first_name : 'Juftingiz');
+      const p2Name = isPrimarySlot() ? (partnerUser ? partnerUser.first_name : 'Juftingiz') : currentUser.first_name;
+      const today = getTodayIsoDate();
+      let p1T = 0, p1All = 0, p2T = 0, p2All = 0;
+
+      (spaceData.missYouPulses || []).forEach(p => {
+        if (p.bySlot === 'p1') { p1All++; if (p.dateStr === today) p1T++; }
+        else { p2All++; if (p.dateStr === today) p2T++; }
+      });
+
+      document.getElementById('pulseP1Name').textContent = p1Name;
+      document.getElementById('pulseP1Stats').textContent = `${t('todayLabel')}: ${p1T} • ${t('totalLabel')}: ${p1All}`;
+      document.getElementById('pulseP2Name').textContent = p2Name;
+      document.getElementById('pulseP2Stats').textContent = `${t('todayLabel')}: ${p2T} • ${t('totalLabel')}: ${p2All}`;
+
+      const last = (spaceData.missYouPulses || []).slice(-1)[0];
+      document.getElementById('lastPulseSubtitle').textContent = last
+        ? `Oxirgi signal: ${last.byName} (${last.timeStr})`
+        : 'Bir-biringizga mehr signali yuboring';
+    }
+
+    function renderMoods() {
+      const presets = t('moodPresets');
+      const myMood = (spaceData.moods && spaceData.moods[currentUser.id]) || presets[0];
+      document.getElementById('myActiveMoodBadge').textContent = myMood;
+      document.getElementById('myMoodName').textContent = `${currentUser.first_name} (Siz)`;
+      document.getElementById('myMoodValue').textContent = myMood;
+
+      if (partnerUser) {
+        document.getElementById('partnerMoodName').textContent = partnerUser.first_name;
+        document.getElementById('partnerMoodValue').textContent = (spaceData.moods && spaceData.moods[partnerUser.id]) || 'Kayfiyat tanlanmagan 🤍';
+      } else {
+        document.getElementById('partnerMoodName').textContent = 'Juftingiz';
+        document.getElementById('partnerMoodValue').textContent = 'Juftingiz kutilmoqda 🤍';
+      }
+
+      document.getElementById('moodChipsContainer').innerHTML = presets.map(m => `
+        <button type="button" onclick='setMyMood(${JSON.stringify(m)})' class="px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap ${m === myMood ? 'sky-gradient text-white' : 'bg-sky-50 text-sky-700 border border-sky-100'}">${escapeHtml(m)}</button>
+      `).join('');
+    }
+
+    function setMyMood(text) {
+      if (!spaceData.moods) spaceData.moods = {};
+      spaceData.moods[currentUser.id] = text;
+      renderMoods();
+      triggerSilentSave();
+    }
+
+    function submitCustomMood(e) {
+      e.preventDefault();
+      const inp = document.getElementById('customMoodInput');
+      if (!inp.value.trim()) return;
+      setMyMood(inp.value.trim());
+      inp.value = '';
+    }
+
+    // Special Dates & Countdown
+    function addSpecialDate() {
+      const titleEl = document.getElementById('specialDateTitleInput');
+      const dateEl = document.getElementById('specialDateValueInput');
+      if (!titleEl.value.trim() || !dateEl.value) return;
+      spaceData.specialDates.push({ id: Date.now(), title: titleEl.value.trim(), date: dateEl.value, author: currentUser.first_name });
+      spaceData.specialDates.sort((a, b) => a.date.localeCompare(b.date));
+      titleEl.value = ''; dateEl.value = '';
+      renderSpecialDates();
+      triggerSilentSave();
+      showToast("Muhim sana qo‘shildi! 📅", "✅");
+    }
+
+    function deleteSpecialDate(id) {
+      askConfirm("Sanani o‘chirish", "Ushbu muhim sanani o‘chirmoqchimisiz?", () => {
+        spaceData.specialDates = spaceData.specialDates.filter(d => d.id !== id);
+        renderSpecialDates();
+        triggerSilentSave();
+      });
+    }
+
+    function renderSpecialDates() {
+      const box = document.getElementById('specialDatesContainer');
+      const list = spaceData.specialDates || [];
+      if (!list.length) {
+        box.innerHTML = `<div class="text-center py-2 text-xs text-slate-400">Tug‘ilgan kun yoki uchrashuv sanasini qo‘shing 📅</div>`;
+        return;
+      }
+      const todayMs = new Date(getTodayIsoDate() + 'T00:00:00').getTime();
+      box.innerHTML = list.map(d => {
+        const diff = Math.round((new Date(d.date + 'T00:00:00').getTime() - todayMs) / 86400000);
+        const badge = diff === 0 ? t('todayCelebration') : (diff > 0 ? `${diff} ${t('daysLeft')}` : `${Math.abs(diff)} ${t('daysAgo')}`);
+        const cls = diff === 0 ? 'bg-emerald-100 text-emerald-700' : (diff > 0 ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-500');
+        return `
+          <div class="flex items-center justify-between p-2.5 rounded-2xl bg-sky-50/70 border border-sky-100 gap-2">
+            <div class="min-w-0 flex-1">
+              <div class="text-xs font-extrabold text-slate-800 truncate">${escapeHtml(d.title)}</div>
+              <div class="text-[10px] text-slate-500">${escapeHtml(d.date)} • <span class="text-sky-600 font-semibold">(${escapeHtml(d.author)})</span></div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold shrink-0 ${cls}">${escapeHtml(badge)}</span>
+            <button type="button" onclick="deleteSpecialDate(${d.id})" class="p-1 text-slate-400 hover:text-rose-500 text-xs">🗑️</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addIdea(e) {
+      e.preventDefault();
+      const inp = document.getElementById('ideaInput');
+      if (!inp.value.trim()) return;
+      spaceData.sharedPlans.unshift({ id: Date.now(), text: inp.value.trim(), done: false, author: currentUser.first_name });
+      inp.value = '';
+      renderIdeas();
+      triggerSilentSave();
+    }
+
+    function toggleIdea(id) {
+      const it = spaceData.sharedPlans.find(i => i.id === id);
+      if (it) { it.done = !it.done; renderIdeas(); triggerSilentSave(); }
+    }
+
+    function deleteIdea(id) {
+      spaceData.sharedPlans = spaceData.sharedPlans.filter(i => i.id !== id);
+      renderIdeas();
+      triggerSilentSave();
+    }
+
+    function renderIdeas() {
+      const box = document.getElementById('ideasList');
+      if (!spaceData.sharedPlans.length) {
+        box.innerHTML = `<div class="text-center py-3 text-xs text-slate-400">Hali rejalar yo‘q ✨</div>`;
+        return;
+      }
+      box.innerHTML = spaceData.sharedPlans.map(it => `
+        <div class="flex items-center justify-between p-2.5 rounded-2xl bg-sky-50/60 border border-sky-100 gap-2">
+          <div onclick="toggleIdea(${it.id})" class="text-xs flex-1 cursor-pointer ${it.done ? 'line-through text-slate-400' : 'text-slate-800 font-semibold'}">
+            ${it.done ? '✅' : '⬜'} ${escapeHtml(it.text)}
+          </div>
+          <span class="text-[10px] text-sky-600 font-semibold shrink-0">(${escapeHtml(it.author)})</span>
+          <button type="button" onclick="deleteIdea(${it.id})" class="p-1 text-slate-400 hover:text-rose-500 text-xs">🗑️</button>
+        </div>
+      `).join('');
+    }
+
+    // ==================== GALLERY (VIDEOS FILTER + LIGHTBOX + CANVAS COMPRESSION + STORAGE CLEANUP) ====================
+    function compressImageCanvas(file, maxW = 900, quality = 0.74) {
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const img = new Image();
+          img.onload = () => {
+            const scale = Math.min(1, maxW / img.width);
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
+            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.onerror = () => resolve(ev.target.result);
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function openPhotoModal() {
+      compressedUploadDataUrl = null;
+      document.getElementById('photoFileInput').value = '';
+      document.getElementById('photoPreviewBox').textContent = '📸 Rasm yoki Video tanlash (maks. 15 MB)';
+      document.getElementById('mediaPreviewContainer').classList.add('hidden');
+      document.getElementById('photoCategoryInput').value = DEFAULT_GALLERY_CATEGORIES[0];
+      document.getElementById('photoCaptionInput').value = '';
+
+      const cats = [...DEFAULT_GALLERY_CATEGORIES, ...new Set((spaceData.photos || []).map(p => p.category).filter(c => c && !DEFAULT_GALLERY_CATEGORIES.includes(c)))];
+      document.getElementById('photoPresetChips').innerHTML = cats.map(c => `
+        <button type="button" onclick='document.getElementById("photoCategoryInput").value=${JSON.stringify(c)}' class="px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-200 text-[11px] font-bold">${escapeHtml(c)}</button>
+      `).join('');
+      openFlexModal('photoModal');
+    }
+
+    async function previewSelectedMedia(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 15 * 1024 * 1024) { showToast("Maksimal hajm 15 MB!", "⚠️"); e.target.value = ''; return; }
+      const wrap = document.getElementById('mediaPreviewContainer');
+      const img = document.getElementById('uploadImgPreview');
+      const vid = document.getElementById('uploadVidPreview');
+      wrap.classList.remove('hidden');
+
+      if (file.type.startsWith('video/')) {
+        document.getElementById('photoPreviewBox').textContent = `🎬 ${file.name}`;
+        img.classList.add('hidden'); vid.classList.remove('hidden');
+        vid.src = URL.createObjectURL(file);
+      } else {
+        document.getElementById('photoPreviewBox').textContent = `📸 ${file.name}`;
+        vid.classList.add('hidden'); img.classList.remove('hidden');
+        compressedUploadDataUrl = await compressImageCanvas(file);
+        img.src = compressedUploadDataUrl;
+      }
+    }
+
+    async function uploadPhotoOrVideo(e) {
+      e.preventDefault();
+      const file = document.getElementById('photoFileInput').files[0];
+      if (!file || file.size > 15 * 1024 * 1024) return;
+      const category = document.getElementById('photoCategoryInput').value.trim() || 'Uchrashuvlar';
+      const caption = document.getElementById('photoCaptionInput').value.trim();
+      const isVideo = file.type.startsWith('video/');
+      const btn = document.getElementById('uploadPhotoBtn');
+      btn.disabled = true;
+
+      try {
+        const ext = (file.name.split('.').pop() || (isVideo ? 'mp4' : 'jpg')).replace(/[^a-zA-Z0-9]/g, '');
+        const storagePath = `media/${currentUser.space_key}_${Date.now()}.${ext}`;
+        let url = '';
+
+        const { error } = await sb.storage.from(STORAGE_BUCKET).upload(storagePath, file, { upsert: true });
+        if (!error) {
+          url = sb.storage.from(STORAGE_BUCKET).getPublicUrl(storagePath).data.publicUrl;
+        } else if (!isVideo && compressedUploadDataUrl) {
+          url = compressedUploadDataUrl;
+        } else {
+          showToast("Media yuklashda xatolik!", "❌"); return;
+        }
+
+        spaceData.photos.unshift({
+          id: 'ph_' + Date.now(), url, storagePath: error ? null : storagePath,
+          mediaType: isVideo ? 'video' : 'image', category, caption, author: currentUser.first_name, likes: 1
+        });
+        closeModal('photoModal');
+        activeGalleryFilter = '__ALL__';
+        renderAllUI();
+        triggerSilentSave();
+        showToast("Galereyaga yuklandi! ✨", "🖼️");
+      } finally { btn.disabled = false; }
+    }
+
+    function openPhotoLightbox(id) {
+      const item = spaceData.photos.find(p => String(p.id) === String(id));
+      if (!item || item.mediaType === 'video') return;
+      activeLightboxId = item.id;
+      document.getElementById('lightboxPhotoImg').src = safeMediaUrl(item.url);
+      document.getElementById('lightboxPhotoCategory').textContent = item.category || 'Xotiralar';
+      document.getElementById('lightboxPhotoAuthor').textContent = `(${item.author})`;
+      document.getElementById('lightboxPhotoLikes').textContent = item.likes || 1;
+      document.getElementById('lightboxPhotoCaptionField').value = item.caption || '';
+      openFlexModal('photoLightboxModal');
+    }
+
+    function incrementLightboxPhotoLike() {
+      const item = spaceData.photos.find(p => String(p.id) === String(activeLightboxId));
+      if (!item) return;
+      item.likes = (item.likes || 1) + 1;
+      document.getElementById('lightboxPhotoLikes').textContent = item.likes;
+      renderGallery();
+      triggerSilentSave();
+    }
+
+    function saveLightboxPhotoCaption() {
+      const item = spaceData.photos.find(p => String(p.id) === String(activeLightboxId));
+      if (!item) return;
+      item.caption = document.getElementById('lightboxPhotoCaptionField').value.trim() || item.caption;
+      closeModal('photoLightboxModal');
+      renderGallery();
+      triggerSilentSave();
+      showToast("Izoh saqlandi!", "✅");
+    }
+
+    function likeGalleryItem(id) {
+      const item = spaceData.photos.find(p => String(p.id) === String(id));
+      if (!item) return;
+      item.likes = (item.likes || 1) + 1;
+      renderGallery();
+      triggerSilentSave();
+    }
+
+    function deleteGalleryItem(id) {
+      const item = spaceData.photos.find(p => String(p.id) === String(id));
+      if (!item) return;
+      askConfirm("Xotirani o‘chirish", item.caption || "Ushbu media faylni o‘chirmoqchimisiz?", async () => {
+        if (item.storagePath) await sb.storage.from(STORAGE_BUCKET).remove([item.storagePath]).catch(() => {});
+        spaceData.photos = spaceData.photos.filter(p => String(p.id) !== String(id));
+        if (String(activeLightboxId) === String(id)) closeModal('photoLightboxModal');
+        renderAllUI();
+        triggerSilentSave();
+        showToast("O‘chirildi", "🗑️");
+      });
+    }
+
+    function renderGallery() {
+      const dynamicCats = [...DEFAULT_GALLERY_CATEGORIES, ...new Set((spaceData.photos || []).map(p => p.category).filter(c => c && !DEFAULT_GALLERY_CATEGORIES.includes(c)))];
+      const pills = [{ key: '__ALL__', label: t('filterAll') }, { key: '__VIDEOS__', label: t('filterVideos') }, ...dynamicCats.map(c => ({ key: c, label: c }))];
+
+      document.getElementById('galleryFilterBar').innerHTML = pills.map(p => `
+        <button type="button" onclick='activeGalleryFilter=${JSON.stringify(p.key)};renderGallery()' class="px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap ${p.key === activeGalleryFilter ? 'sky-gradient text-white' : 'bg-white text-slate-600 border border-sky-100'}">${escapeHtml(p.label)}</button>
+      `).join('');
+
+      let list = spaceData.photos || [];
+      if (activeGalleryFilter === '__VIDEOS__') list = list.filter(p => p.mediaType === 'video');
+      else if (activeGalleryFilter !== '__ALL__') list = list.filter(p => p.category === activeGalleryFilter);
+
+      const grid = document.getElementById('galleryGrid');
+      if (!list.length) {
+        grid.innerHTML = `<div class="col-span-2 glass-card rounded-3xl p-8 text-center text-xs text-slate-400">Hali bu bo‘limda rasm yoki video yo‘q 🖼️</div>`;
+        return;
+      }
+      grid.innerHTML = list.map(p => {
+        const cleanUrl = safeMediaUrl(p.url);
+        return `
+          <div class="glass-card rounded-2xl overflow-hidden flex flex-col">
+            <div class="relative aspect-square bg-sky-50">
+              ${p.mediaType === 'video'
+                ? `<video src="${cleanUrl}" controls playsinline preload="metadata" class="w-full h-full object-cover bg-slate-900"></video>`
+                : `<img src="${cleanUrl}" loading="lazy" onclick='openPhotoLightbox(${JSON.stringify(p.id)})' class="w-full h-full object-cover cursor-pointer" />`}
+              <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-slate-900/65 text-white text-[9px] font-bold">${escapeHtml(p.category)}</span>
+              <button type="button" onclick='deleteGalleryItem(${JSON.stringify(p.id)})' class="absolute top-2 right-2 w-6 h-6 rounded-full bg-rose-500/90 text-white text-[10px] flex items-center justify-center">🗑️</button>
+            </div>
+            <div class="p-2.5">
+              <div onclick='${p.mediaType === 'video' ? '' : `openPhotoLightbox(${JSON.stringify(p.id)})`}' class="text-xs font-extrabold text-slate-800 truncate cursor-pointer">${escapeHtml(p.caption)}</div>
+              <div class="flex items-center justify-between mt-1">
+                <span class="text-[10px] font-bold text-sky-600 truncate">(${escapeHtml(p.author)})</span>
+                <button type="button" onclick='likeGalleryItem(${JSON.stringify(p.id)})' class="text-[10px] font-bold text-rose-500">❤️ ${p.likes || 1}</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ==================== MUSIC (LIVE PROGRESS BAR + 1-TAP PLAYLIST SWITCH + STORAGE CLEANUP) ====================
+    function openMusicModal() {
+      document.getElementById('audioFileInput').value = '';
+      document.getElementById('audioFileNameLabel').textContent = '🎧 MP3 fayl tanlash (maks. 15 MB)';
+      document.getElementById('songTitleInput').value = '';
+      document.getElementById('songArtistInput').value = '';
+      openFlexModal('musicModal');
+    }
+
+    function onAudioFilePicked(e) {
+      const f = e.target.files[0];
+      if (!f) return;
+      if (f.size > 15 * 1024 * 1024) { showToast("Maksimal hajm 15 MB!", "⚠️"); e.target.value = ''; return; }
+      document.getElementById('audioFileNameLabel').textContent = '🎵 ' + f.name;
+      if (!document.getElementById('songTitleInput').value) document.getElementById('songTitleInput').value = f.name.replace(/\.[^/.]+$/, '');
+    }
+
+    async function uploadSong(e) {
+      e.preventDefault();
+      const file = document.getElementById('audioFileInput').files[0];
+      if (!file) return;
+      const title = document.getElementById('songTitleInput').value.trim();
+      const artist = document.getElementById('songArtistInput').value.trim();
+      const pType = document.getElementById('songPlaylistSelect').value;
+
+      const btn = document.getElementById('uploadSongBtn');
+      btn.disabled = true;
+      try {
+        const ext = (file.name.split('.').pop() || 'mp3').replace(/[^a-zA-Z0-9]/g, '');
+        const storagePath = `audio/${currentUser.space_key}_${Date.now()}.${ext}`;
+        const { error } = await sb.storage.from(STORAGE_BUCKET).upload(storagePath, file, { upsert: true });
+        const url = !error ? sb.storage.from(STORAGE_BUCKET).getPublicUrl(storagePath).data.publicUrl : URL.createObjectURL(file);
+
+        spaceData.songs.unshift({
+          id: 'song_' + Date.now(), title, artist, url, storagePath: error ? null : storagePath,
+          playlist: pType === 'shared' ? 'shared' : getMySlotKey(), author: currentUser.first_name
+        });
+        closeModal('musicModal');
+        renderAllUI();
+        triggerSilentSave();
+        showToast("Qo‘shiq qo‘shildi! 🎶", "🎧");
+      } finally { btn.disabled = false; }
+    }
+
+    function toggleSongPlaylist(id) {
+      const s = spaceData.songs.find(item => String(item.id) === String(id));
+      if (!s) return;
+      s.playlist = s.playlist === 'shared' ? getMySlotKey() : 'shared';
+      renderMusic();
+      triggerSilentSave();
+      showToast(s.playlist === 'shared' ? "Umumiy playlistga o‘tkazildi 🩵" : "Shaxsiy playlistga o‘tkazildi 🎧", "⇄");
+    }
+
+    function deleteSong(id) {
+      const s = spaceData.songs.find(item => String(item.id) === String(id));
+      if (!s) return;
+      askConfirm("Qo‘shiqni o‘chirish", s.title, async () => {
+        if (String(currentPlayingSongId) === String(id)) closeAudioPlayer();
+        if (s.storagePath) await sb.storage.from(STORAGE_BUCKET).remove([s.storagePath]).catch(() => {});
+        spaceData.songs = spaceData.songs.filter(item => String(item.id) !== String(id));
+        renderAllUI();
+        triggerSilentSave();
+        showToast("Qo‘shiq o‘chirildi", "🗑️");
+      });
+    }
+
+    function renderMusic() {
+      const p1Label = isPrimarySlot() ? currentUser.first_name : (partnerUser ? partnerUser.first_name : 'Juftingiz');
+      const p2Label = isPrimarySlot() ? (partnerUser ? partnerUser.first_name : 'Juftingiz') : currentUser.first_name;
+      const tabs = [
+        { k: 'all', l: 'Barchasi' },
+        { k: 'shared', l: 'Umumiy 🩵' },
+        { k: 'p1', l: p1Label },
+        { k: 'p2', l: p2Label }
+      ];
+
+      document.getElementById('playlistTabs').innerHTML = tabs.map(tb => `
+        <button type="button" onclick="activePlaylistFilter='${tb.k}';renderMusic()" class="px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap ${activePlaylistFilter === tb.k ? 'sky-gradient text-white' : 'bg-white text-slate-600 border border-sky-100'}">${escapeHtml(tb.l)}</button>
+      `).join('');
+
+      const list = activePlaylistFilter === 'all' ? spaceData.songs : spaceData.songs.filter(s => s.playlist === activePlaylistFilter);
+      const box = document.getElementById('songsList');
+      if (!list.length) {
+        box.innerHTML = `<div class="glass-card rounded-3xl p-8 text-center text-xs text-slate-400">Hali qo‘shiqlar yo‘q 🎧</div>`;
+        return;
+      }
+      box.innerHTML = list.map(s => {
+        const isCurrent = String(s.id) === String(currentPlayingSongId) && isPlaying;
+        const isShared = s.playlist === 'shared';
+        return `
+          <div class="glass-card rounded-2xl p-3 flex items-center justify-between gap-2 ${String(s.id) === String(currentPlayingSongId) ? 'border-sky-400 bg-sky-50/40' : ''}">
+            <div onclick='playSongById(${JSON.stringify(s.id)})' class="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer">
+              <div class="w-9 h-9 rounded-xl ${isCurrent ? 'bg-sky-500 text-white' : 'sky-soft text-sky-600'} flex items-center justify-center font-extrabold text-xs shrink-0">${isCurrent ? '⏸' : '▶'}</div>
+              <div class="min-w-0">
+                <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(s.title)}</div>
+                <div class="text-[10px] text-slate-500 truncate">${escapeHtml(s.artist)} • (${escapeHtml(s.author)})</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" onclick='toggleSongPlaylist(${JSON.stringify(s.id)})' class="px-2 py-1 rounded-lg ${isShared ? 'bg-slate-100 text-slate-700' : 'bg-sky-100 text-sky-700'} text-[10px] font-bold">⇄ ${isShared ? 'Shaxsiyga' : 'Umumiyga'}</button>
+              <button type="button" onclick='deleteSong(${JSON.stringify(s.id)})' class="p-1.5 rounded-lg bg-rose-50 text-rose-500 text-[10px]">🗑️</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function playSongById(id) {
+      const s = spaceData.songs.find(item => String(item.id) === String(id));
+      if (!s) return;
+      if (String(currentPlayingSongId) === String(id)) { togglePlayPause(); return; }
+      const audio = document.getElementById('htmlAudio');
+      audio.src = s.url;
+      audio.play().catch(() => {});
+      currentPlayingSongId = s.id; isPlaying = true;
+      document.getElementById('nowPlayingTitle').textContent = s.title;
+      document.getElementById('nowPlayingArtist').textContent = `${s.artist} (${s.author})`;
+      document.getElementById('playPauseBtn').textContent = '⏸';
+      document.getElementById('audioPlayerBar').classList.remove('hidden');
+      renderMusic();
+    }
+
+    document.getElementById('htmlAudio').addEventListener('timeupdate', function () {
+      if (!this.duration) return;
+      document.getElementById('miniPlayerProgressBar').style.width = Math.min(100, (this.currentTime / this.duration) * 100) + '%';
+    });
+
+    function togglePlayPause() {
+      const audio = document.getElementById('htmlAudio');
+      if (isPlaying) { audio.pause(); isPlaying = false; document.getElementById('playPauseBtn').textContent = '▶'; }
+      else { audio.play().catch(() => {}); isPlaying = true; document.getElementById('playPauseBtn').textContent = '⏸'; }
+      renderMusic();
+    }
+    function onSongEnded() { isPlaying = false; document.getElementById('playPauseBtn').textContent = '▶'; document.getElementById('miniPlayerProgressBar').style.width = '0%'; renderMusic(); }
+    function closeAudioPlayer() { const a = document.getElementById('htmlAudio'); a.pause(); a.removeAttribute('src'); currentPlayingSongId = null; isPlaying = false; document.getElementById('audioPlayerBar').classList.add('hidden'); renderMusic(); }
+
+    // ==================== TIME CAPSULE, CUSTOM SECRET QUESTION & CHAT ====================
+    function toggleTimeCapsuleComposer() {
+      const box = document.getElementById('timeCapsuleComposerBox');
+      box.classList.toggle('hidden');
+      if (!box.classList.contains('hidden')) {
+        document.getElementById('capsuleUnlockDateInput').min = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+      }
+    }
+
+    function createTimeCapsule() {
+      const title = document.getElementById('capsuleTitleInput').value.trim();
+      const body = document.getElementById('capsuleBodyInput').value.trim();
+      const unlockDate = document.getElementById('capsuleUnlockDateInput').value;
+      if (!title || !body || !unlockDate) { showToast("Barcha maydonlarni to‘ldiring!", "⚠️"); return; }
+
+      spaceData.timeCapsules.unshift({ id: Date.now(), title, message: body, unlockDate, author: currentUser.first_name });
+      document.getElementById('capsuleTitleInput').value = '';
+      document.getElementById('capsuleBodyInput').value = '';
+      document.getElementById('capsuleUnlockDateInput').value = '';
+      document.getElementById('timeCapsuleComposerBox').classList.add('hidden');
+      renderCapsules();
+      triggerSilentSave();
+      showToast("Vaqt kapsulasi muhrlandi! 🔒", "⏳");
+    }
+
+    function toggleOpenCapsule(id) {
+      if (expandedCapsuleIds.has(id)) expandedCapsuleIds.delete(id);
+      else expandedCapsuleIds.add(id);
+      renderCapsules();
+    }
+
+    function deleteTimeCapsule(id) {
+      askConfirm("Kapsulani o‘chirish", "Ushbu kelajakka xatni o‘chirmoqchimisiz?", () => {
+        spaceData.timeCapsules = spaceData.timeCapsules.filter(c => c.id !== id);
+        renderCapsules();
+        triggerSilentSave();
+      });
+    }
+
+    function renderCapsules() {
+      const box = document.getElementById('capsulesList');
+      const list = spaceData.timeCapsules || [];
+      if (!list.length) {
+        box.innerHTML = `<div class="text-center py-2 text-[11px] text-slate-400">Hali kelajakka xat muhrlanmagan ⏳</div>`;
+        return;
+      }
+      const today = getTodayIsoDate();
+      const todayMs = new Date(today + 'T00:00:00').getTime();
+
+      box.innerHTML = list.map(c => {
+        const unlocked = today >= c.unlockDate;
+        const daysLeft = Math.max(1, Math.ceil((new Date(c.unlockDate + 'T00:00:00').getTime() - todayMs) / 86400000));
+        const isOpen = expandedCapsuleIds.has(c.id);
+        return `
+          <div class="p-3 rounded-2xl bg-white border ${unlocked ? 'border-emerald-200' : 'border-sky-100'} space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <div class="min-w-0 flex-1">
+                <div class="text-xs font-extrabold text-slate-900 truncate">${unlocked ? '🔓' : '🔒'} ${escapeHtml(c.title || 'Kelajakka xat')}</div>
+                <div class="text-[10px] text-sky-600 font-bold">${escapeHtml(c.author)}</div>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                ${unlocked
+                  ? `<button type="button" onclick="toggleOpenCapsule(${c.id})" class="px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 text-[10px] font-extrabold">${isOpen ? 'Yopish' : 'O‘qish 💌'}</button>`
+                  : `<span class="px-2 py-1 rounded-xl bg-sky-50 text-sky-700 text-[10px] font-bold">🔒 ${c.unlockDate} (${daysLeft}d)</span>`}
+                <button type="button" onclick="deleteTimeCapsule(${c.id})" class="p-1 text-slate-400 hover:text-rose-500 text-xs">🗑️</button>
+              </div>
+            </div>
+            ${unlocked && isOpen ? `<div class="p-3 rounded-xl bg-sky-50/80 border border-sky-100 text-xs text-slate-800 whitespace-pre-line">${escapeHtml(c.message || c.text)}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openAddSecretQuestionModal() {
+      document.getElementById('newSecretQuestionField').value = '';
+      openFlexModal('addSecretQuestionModal');
+    }
+
+    function saveNewSecretQuestion() {
+      const qText = document.getElementById('newSecretQuestionField').value.trim();
+      if (!qText) return;
+      spaceData.secretQuestions.unshift({ q: qText, answers: {} });
+      spaceData.secretQuestionIdx = 0;
+      closeModal('addSecretQuestionModal');
+      renderChatAndSecretQuestion();
+      triggerSilentSave();
+      showToast("Yangi sirli savol qo‘shildi! 🔐", "✨");
+    }
+
+    function renderChatAndSecretQuestion() {
+      const qs = spaceData.secretQuestions?.length ? spaceData.secretQuestions : DEFAULT_SECRET_QUESTIONS;
+      const qObj = qs[(spaceData.secretQuestionIdx || 0) % qs.length];
+      document.getElementById('secretQuestionText').textContent = qObj.q;
+
+      const answers = qObj.answers || {};
+      const myAns = answers[currentUser.id];
+      const pAns = partnerUser ? answers[partnerUser.id] : null;
+
+      let html = !myAns
+        ? `<form onsubmit="submitSecretAnswer(event)" class="flex gap-2"><input id="secretAnsInput" type="text" required placeholder="Javobingiz..." class="flex-1 px-3 py-2 rounded-xl bg-sky-50/70 border border-sky-200 text-xs" /><button type="submit" class="px-3.5 py-2 rounded-xl sky-gradient text-white text-xs font-bold">Saqlash</button></form>`
+        : `<div class="p-2.5 rounded-xl bg-sky-50 text-xs"><b class="text-sky-700">${escapeHtml(currentUser.first_name)}:</b> ${escapeHtml(myAns)}</div>`;
+
+      if (partnerUser) {
+        html += (myAns && pAns)
+          ? `<div class="p-2.5 rounded-xl bg-emerald-50 text-xs"><b class="text-emerald-700">${escapeHtml(partnerUser.first_name)}:</b> ${escapeHtml(pAns)}</div>`
+          : `<div class="p-2.5 rounded-xl bg-slate-50 text-[11px] text-slate-500">🔒 ${escapeHtml(partnerUser.first_name)}ning javobi ikkalangiz ham yozgach ochiladi.</div>`;
+      }
+      document.getElementById('secretAnswersArea').innerHTML = html;
+
+      const box = document.getElementById('chatMessages');
+      if (!spaceData.chatMessages.length) {
+        box.innerHTML = `<div class="text-center text-xs text-slate-400 py-10">Suhbatni boshlang 💬</div>`;
+        return;
+      }
+      box.innerHTML = spaceData.chatMessages.map(m => {
+        const isMe = (m.senderId === currentUser.id) || (m.author === currentUser.first_name);
+        return `
+          <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+            <div class="max-w-[80%] px-3.5 py-2 rounded-2xl text-xs ${isMe ? 'sky-gradient text-white' : 'bg-slate-100 text-slate-800'}">${escapeHtml(m.text)}</div>
+            <span class="text-[9px] text-slate-400 mt-0.5">${escapeHtml(m.senderName || m.author)} • ${escapeHtml(m.time || '')}</span>
+          </div>
+        `;
+      }).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function submitSecretAnswer(e) {
+      e.preventDefault();
+      const val = document.getElementById('secretAnsInput').value.trim();
+      if (!val) return;
+      const qObj = spaceData.secretQuestions[(spaceData.secretQuestionIdx || 0) % spaceData.secretQuestions.length];
+      if (!qObj.answers) qObj.answers = {};
+      qObj.answers[currentUser.id] = val;
+      renderChatAndSecretQuestion();
+      triggerSilentSave();
+    }
+
+    function nextSecretQuestion() {
+      spaceData.secretQuestionIdx = ((spaceData.secretQuestionIdx || 0) + 1) % spaceData.secretQuestions.length;
+      renderChatAndSecretQuestion();
+      triggerSilentSave();
+    }
+
+    function sendChatMessage(e) {
+      e.preventDefault();
+      const inp = document.getElementById('chatInput');
+      if (!inp.value.trim()) return;
+      spaceData.chatMessages.push({
+        id: 'm_' + Date.now(), senderId: currentUser.id, senderName: currentUser.first_name,
+        text: inp.value.trim(), time: new Date().toTimeString().slice(0, 5)
+      });
+      inp.value = '';
+      renderChatAndSecretQuestion();
+      triggerSilentSave();
+    }
+
+    // ==================== 4 INTERACTIVE MINI-GAMES + SCOREBOARD ====================
+    let currentWmlIdx = 0;
+    let todClaimed = false;
+    const MEMORY_EMOJIS = ['🩵', '✨', '🌙', '☕', '🎧', '✈️', '🌸', '💌'];
+    let memoryDeck = [], flippedIndices = [], matchedIndices = new Set(), memoryMoves = 0, memoryLocked = false;
+
+    function addPointsToMe(pts) {
+      if (!spaceData.quizScore || typeof spaceData.quizScore !== 'object') spaceData.quizScore = { p1: 0, p2: 0 };
+      const slot = getMySlotKey();
+      spaceData.quizScore[slot] = (spaceData.quizScore[slot] || 0) + pts;
+      renderAllUI();
+      triggerSilentSave();
+    }
+
+    function renderGamesAll() {
+      const p1Label = isPrimarySlot() ? currentUser.first_name : (partnerUser ? partnerUser.first_name : 'Juftingiz');
+      const p2Label = isPrimarySlot() ? (partnerUser ? partnerUser.first_name : 'Juftingiz') : currentUser.first_name;
+      const p1Pts = spaceData.quizScore?.p1 || 0;
+      const p2Pts = spaceData.quizScore?.p2 || 0;
+
+      document.getElementById('gamePlayer1Name').textContent = p1Label;
+      document.getElementById('gamePlayer2Name').textContent = p2Label;
+      document.getElementById('gamePlayer1Score').textContent = `${p1Pts} ${t('pointsUnit')}`;
+      document.getElementById('gamePlayer2Score').textContent = `${p2Pts} ${t('pointsUnit')}`;
+      document.getElementById('gameTotalScoreBadge').textContent = `${t('totalLabel')}: ${p1Pts + p2Pts} ${t('pointsUnit')}`;
+
+      // Game 1: Quiz
+      const q = QUIZ_BANK[(spaceData.quizIdx || 0) % QUIZ_BANK.length];
+      document.getElementById('quizQuestion').textContent = q.q;
+      document.getElementById('quizOptions').innerHTML = q.opts.map((o, i) => `
+        <button type="button" onclick="answerQuiz(${i})" class="p-3 rounded-2xl bg-sky-50 hover:bg-sky-100 border border-sky-100 text-xs font-bold text-slate-800 text-left">${escapeHtml(o)}</button>
+      `).join('');
+
+      // Game 2: Who's More Likely
+      document.getElementById('wmlPromptText').textContent = WHO_MORE_LIKELY_QS[currentWmlIdx % WHO_MORE_LIKELY_QS.length];
+      document.getElementById('wmlVoteBtnP1').textContent = p1Label;
+      document.getElementById('wmlVoteBtnP2').textContent = p2Label;
+      const votes = (spaceData.whoMoreLikelyVotes && spaceData.whoMoreLikelyVotes[currentWmlIdx]) || {};
+      const myChoice = votes[getMySlotKey()];
+      document.getElementById('wmlVoteBtnP1').className = myChoice === 'p1' ? 'py-3 px-2 rounded-2xl bg-sky-500 text-white border-2 border-sky-500 text-xs font-extrabold truncate' : 'py-3 px-2 rounded-2xl bg-white border-2 border-sky-200 text-sky-700 text-xs font-extrabold truncate';
+      document.getElementById('wmlVoteBtnP2').className = myChoice === 'p2' ? 'py-3 px-2 rounded-2xl bg-cyan-500 text-white border-2 border-cyan-500 text-xs font-extrabold truncate' : 'py-3 px-2 rounded-2xl bg-white border-2 border-cyan-200 text-cyan-700 text-xs font-extrabold truncate';
+
+      const p1Pick = votes.p1 === 'p1' ? p1Label : (votes.p1 === 'p2' ? p2Label : '...');
+      const p2Pick = votes.p2 === 'p1' ? p1Label : (votes.p2 === 'p2' ? p2Label : '...');
+      document.getElementById('wmlVotesSummaryBox').innerHTML = `
+        <div class="flex justify-between"><span class="text-slate-500">${escapeHtml(p1Label)}:</span><b class="text-sky-700">${escapeHtml(p1Pick)}</b></div>
+        <div class="flex justify-between"><span class="text-slate-500">${escapeHtml(p2Label)}:</span><b class="text-cyan-700">${escapeHtml(p2Pick)}</b></div>
+      `;
+    }
+
+    function answerQuiz(i) {
+      const idx = (spaceData.quizIdx || 0) % QUIZ_BANK.length;
+      if (i === QUIZ_BANK[idx].ans) { addPointsToMe(10); showToast("+10 ball! 🎉", "🏆"); }
+      spaceData.quizIdx = idx + 1;
+      renderAllUI();
+      triggerSilentSave();
+    }
+
+    function advanceQuizQuestion() {
+      spaceData.quizIdx = ((spaceData.quizIdx || 0) + 1) % QUIZ_BANK.length;
+      renderGamesAll();
+    }
+
+    function castWhoMoreLikelyVote(targetSlot) {
+      if (!spaceData.whoMoreLikelyVotes) spaceData.whoMoreLikelyVotes = {};
+      if (!spaceData.whoMoreLikelyVotes[currentWmlIdx]) spaceData.whoMoreLikelyVotes[currentWmlIdx] = {};
+      const mySlot = getMySlotKey();
+      const isFirst = !spaceData.whoMoreLikelyVotes[currentWmlIdx][mySlot];
+      spaceData.whoMoreLikelyVotes[currentWmlIdx][mySlot] = targetSlot;
+      if (isFirst) { addPointsToMe(5); showToast("+5 ball! 🤔", "✅"); }
+      else { renderGamesAll(); triggerSilentSave(); }
+    }
+
+    function advanceWhoMoreLikely() {
+      currentWmlIdx = (currentWmlIdx + 1) % WHO_MORE_LIKELY_QS.length;
+      renderGamesAll();
+    }
+
+    function playTruthOrDare(type) {
+      const pool = type === 'truth' ? TRUTHS : DARES;
+      document.getElementById('todCardBadge').textContent = type === 'truth' ? t('btnTruth') : t('btnDare');
+      document.getElementById('todText').textContent = pool[Math.floor(Math.random() * pool.length)];
+      document.getElementById('todClaimPointsBtn').classList.remove('hidden');
+      todClaimed = false;
+    }
+
+    function claimTruthOrDarePoints() {
+      if (todClaimed) return;
+      todClaimed = true;
+      document.getElementById('todClaimPointsBtn').classList.add('hidden');
+      addPointsToMe(15);
+      showToast("+15 ball! 🏆", "🎉");
+    }
+
+    function initMemoryMatchGame() {
+      memoryDeck = [...MEMORY_EMOJIS, ...MEMORY_EMOJIS].sort(() => Math.random() - 0.5);
+      flippedIndices = []; matchedIndices = new Set(); memoryMoves = 0; memoryLocked = false;
+      renderMemoryGrid();
+    }
+
+    function renderMemoryGrid() {
+      document.getElementById('memoryStatsText').textContent = `${memoryMoves} • ${Math.floor(matchedIndices.size / 2)}/8`;
+      document.getElementById('memoryGridContainer').innerHTML = memoryDeck.map((emoji, idx) => {
+        const matched = matchedIndices.has(idx);
+        const flipped = flippedIndices.includes(idx) || matched;
+        return `<button type="button" onclick="flipMemoryCard(${idx})" class="h-14 rounded-2xl text-xl font-bold flex items-center justify-center transition ${matched ? 'bg-emerald-50 border-2 border-emerald-300' : flipped ? 'bg-white border-2 border-sky-400' : 'sky-gradient text-white'}">${flipped ? emoji : '🩵'}</button>`;
+      }).join('');
+    }
+
+    function flipMemoryCard(idx) {
+      if (memoryLocked || matchedIndices.has(idx) || flippedIndices.includes(idx)) return;
+      flippedIndices.push(idx);
+      renderMemoryGrid();
+      if (flippedIndices.length === 2) {
+        memoryMoves++;
+        const [a, b] = flippedIndices;
+        if (memoryDeck[a] === memoryDeck[b]) {
+          matchedIndices.add(a); matchedIndices.add(b); flippedIndices = [];
+          renderMemoryGrid();
+          if (matchedIndices.size === memoryDeck.length) { addPointsToMe(25); showToast("+25 ball! 🎉", "🏆"); }
+        } else {
+          memoryLocked = true;
+          setTimeout(() => { flippedIndices = []; memoryLocked = false; renderMemoryGrid(); }, 650);
+        }
+      }
+    }
+
+    // ==================== SUPPORT, ANNOUNCEMENTS & ADMIN DASHBOARD ====================
+    async function openSupportTicketModal() {
+      closeModal('profileModal');
+      openFlexModal('supportModal');
+      const { data } = await sb.from('support_tickets').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+      const box = document.getElementById('myTicketsHistory');
+      if (!data?.length) { box.innerHTML = `<div class="text-[11px] text-slate-400">Hali murojaatlaringiz yo‘q.</div>`; return; }
+      box.innerHTML = data.map(tk => `
+        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[11px]">
+          <div class="flex justify-between font-bold"><span>${tk.type === 'report' ? '🚩 Shikoyat' : '🆘 Murojaat'}</span><span class="${tk.status === 'resolved' ? 'text-emerald-600' : 'text-amber-600'}">${tk.status}</span></div>
+          <div class="text-slate-700 mt-1">${escapeHtml(tk.message)}</div>
+          ${tk.admin_reply ? `<div class="mt-1 p-2 rounded-lg bg-sky-50 text-sky-800"><b>Admin:</b> ${escapeHtml(tk.admin_reply)}</div>` : ''}
+        </div>
+      `).join('');
+    }
+
+    async function submitSupportTicket(e) {
+      e.preventDefault();
+      const message = document.getElementById('ticketMessageInput').value.trim();
+      if (!message) return;
+      await sb.from('support_tickets').insert({
+        id: 'tkt_' + Date.now(), user_id: currentUser.id, user_name: `${currentUser.first_name} ${currentUser.last_name}`,
+        user_email: currentUser.email, type: document.getElementById('ticketTypeSelect').value, message, status: 'open', created_at: new Date().toISOString()
+      });
+      document.getElementById('ticketMessageInput').value = '';
+      showToast("Murojaat yuborildi! 📩", "✅");
+      openSupportTicketModal();
+    }
+
+    async function loadSystemAnnouncement() {
+      const { data } = await sb.from('system_announcements').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(1).maybeSingle();
+      if (data?.message && localStorage.getItem('jm_dismissed_ann') !== data.id) {
+        window._activeAnnId = data.id;
+        document.getElementById('announcementText').textContent = data.message;
+        document.getElementById('systemAnnouncementBanner').classList.remove('hidden');
+      }
+    }
+    function dismissAnnouncement() {
+      if (window._activeAnnId) localStorage.setItem('jm_dismissed_ann', window._activeAnnId);
+      document.getElementById('systemAnnouncementBanner').classList.add('hidden');
+    }
+
+    function isSuperAdmin() { return currentUser && (currentUser.role === 'super_admin' || currentUser.email === SUPER_ADMIN_EMAIL); }
+    function hasAdminPerm(k) { return isSuperAdmin() || (currentUser?.role === 'admin' && Boolean(currentUser.admin_permissions?.[k])); }
+    async function logAdminAudit(action, targetInfo) {
+      await sb.from('admin_audit_logs').insert({ id: 'aud_' + Date.now(), actor_id: currentUser.id, actor_email: currentUser.email, actor_role: currentUser.role, action, target_info: targetInfo, created_at: new Date().toISOString() });
+    }
+
+    async function openAdminDashboard() {
+      if (!isSuperAdmin() && currentUser?.role !== 'admin') return;
+      document.getElementById('adminRolePill').textContent = isSuperAdmin() ? 'SUPER ADMIN' : 'ADMIN';
+      document.getElementById('adTab-roles').classList.toggle('hidden', !isSuperAdmin());
+      document.getElementById('adminDashboardModal').classList.remove('hidden');
+      switchAdminSubTab('overview');
+      await refreshAdminData();
+    }
+
+    function switchAdminSubTab(tab) {
+      ['overview', 'users', 'roles', 'tickets', 'announce', 'audit'].forEach(tb => {
+        document.getElementById(`adminPane-${tb}`).classList.add('hidden');
+        document.getElementById(`adTab-${tb}`).className = 'px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 text-[11px] font-bold whitespace-nowrap';
+      });
+      document.getElementById(`adminPane-${tab}`).classList.remove('hidden');
+      document.getElementById(`adTab-${tab}`).className = 'px-3 py-1.5 rounded-xl bg-slate-900 text-white text-[11px] font-bold whitespace-nowrap';
+    }
+
+    async function refreshAdminData() {
+      const { data: users } = await sb.from('app_users').select('id, first_name, last_name, email, invite_code, partner_id, role, admin_permissions, is_banned, ban_reason, phone_verified, phone_masked, last_seen_at').order('last_seen_at', { ascending: false });
+      adminAllUsers = users || [];
+      const { data: tickets } = await sb.from('support_tickets').select('*').order('created_at', { ascending: false });
+      adminAllTickets = tickets || [];
+      const { data: logs } = await sb.from('admin_audit_logs').select('*').order('created_at', { ascending: false }).limit(40);
+      adminAuditLogs = logs || [];
+
+      document.getElementById('adStatTotalUsers').textContent = adminAllUsers.length;
+      document.getElementById('adStatPairedUsers').textContent = adminAllUsers.filter(u => u.partner_id).length;
+      document.getElementById('adStatActiveToday').textContent = adminAllUsers.filter(u => u.last_seen_at && Date.now() - new Date(u.last_seen_at).getTime() < 86400000).length;
+      document.getElementById('adStatOpenTickets').textContent = adminAllTickets.filter(tk => tk.status !== 'resolved').length;
+
+      renderAdminUsersList();
+      renderAdminStaffList();
+      renderAdminTicketsList();
+      renderAdminAuditList();
+    }
+
+    function renderAdminUsersList() {
+      const box = document.getElementById('adminUsersContainer');
+      if (!hasAdminPerm('viewUsers')) { box.innerHTML = `<div class="text-xs text-rose-500 font-bold">Ruxsat yo‘q.</div>`; return; }
+      const q = (document.getElementById('adminUserSearch').value || '').trim().toLowerCase();
+      const list = adminAllUsers.filter(u => !q || `${u.first_name} ${u.last_name} ${u.email} ${u.invite_code}`.toLowerCase().includes(q));
+      box.innerHTML = list.map(u => `
+        <div class="bg-white p-3.5 rounded-2xl border ${u.is_banned ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200'} text-xs space-y-1">
+          <div class="flex justify-between"><span class="font-extrabold">${escapeHtml(u.first_name)} ${escapeHtml(u.last_name)}</span><span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-sky-100 text-sky-700">${(u.role || 'user').toUpperCase()}</span></div>
+          <div class="text-[11px] text-slate-500">${escapeHtml(u.email)} • <b>${escapeHtml(u.invite_code)}</b></div>
+          <div class="text-[10px] text-slate-400">Juftlik: ${u.partner_id ? 'Ulangan ✅' : 'Yolg‘iz'} • Tel: ${u.phone_verified ? escapeHtml(u.phone_masked) : 'Yo‘q'}</div>
+          ${u.role !== 'super_admin' && hasAdminPerm('banUsers') ? `<button type="button" onclick="toggleBanUser('${u.id}', ${!u.is_banned})" class="mt-1 px-3 py-1 rounded-xl ${u.is_banned ? 'bg-emerald-600 text-white' : 'bg-rose-50 text-rose-600'} text-[10px] font-bold">${u.is_banned ? 'Blokdan chiqarish ✅' : 'Bloklash 🚫'}</button>` : ''}
+        </div>
+      `).join('');
+    }
+
+    async function toggleBanUser(id, ban) {
+      let reason = '';
+      if (ban) { reason = prompt("Bloklash sababi:"); if (!reason) return; }
+      await sb.from('app_users').update({ is_banned: ban, ban_reason: reason }).eq('id', id);
+      await logAdminAudit(ban ? 'USER_BANNED' : 'USER_UNBANNED', `${id} (${reason || 'ok'})`);
+      await refreshAdminData();
+    }
+
+    async function assignAdminRole() {
+      if (!isSuperAdmin()) return;
+      const email = document.getElementById('promoteAdminEmail').value.trim().toLowerCase();
+      if (!email) return;
+      const perms = {
+        viewUsers: document.getElementById('permViewUsers').checked,
+        banUsers: document.getElementById('permBanUsers').checked,
+        tickets: document.getElementById('permTickets').checked,
+        announce: document.getElementById('permAnnounce').checked
+      };
+      const { data: target } = await sb.from('app_users').select('id').eq('email', email).maybeSingle();
+      if (!target) { showToast("Email topilmadi!", "❌"); return; }
+      await sb.from('app_users').update({ role: 'admin', admin_permissions: perms }).eq('id', target.id);
+      await logAdminAudit('ASSIGN_ADMIN', email);
+      document.getElementById('promoteAdminEmail').value = '';
+      showToast("Admin tayinlandi!", "🔑");
+      await refreshAdminData();
+    }
+
+    async function revokeAdminRole(id, email) {
+      if (!isSuperAdmin()) return;
+      await sb.from('app_users').update({ role: 'user', admin_permissions: null }).eq('id', id);
+      await logAdminAudit('REVOKE_ADMIN', email);
+      await refreshAdminData();
+    }
+
+    function renderAdminStaffList() {
+      const staff = adminAllUsers.filter(u => u.role === 'super_admin' || u.role === 'admin');
+      document.getElementById('adminStaffList').innerHTML = staff.map(s => `
+        <div class="bg-white p-3 rounded-2xl border border-slate-200 flex justify-between items-center text-xs">
+          <div><div class="font-extrabold">${escapeHtml(s.first_name)} (${escapeHtml(s.email)})</div><div class="text-[10px] text-sky-600 font-bold">${s.role.toUpperCase()}</div></div>
+          ${s.role === 'admin' && isSuperAdmin() ? `<button type="button" onclick="revokeAdminRole('${s.id}','${escapeHtml(s.email)}')" class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 text-[10px] font-bold">Olib tashlash</button>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function renderAdminTicketsList() {
+      const box = document.getElementById('adminTicketsList');
+      box.innerHTML = adminAllTickets.length
+        ? adminAllTickets.map(tk => `
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-200 text-xs space-y-1.5">
+              <div class="flex justify-between font-bold"><span>${escapeHtml(tk.user_name)}</span><span class="text-[10px] text-amber-600">${tk.status}</span></div>
+              <p class="text-slate-700">${escapeHtml(tk.message)}</p>
+              ${tk.admin_reply ? `<div class="p-2 rounded-lg bg-sky-50 text-sky-800 text-[11px]">Javob: ${escapeHtml(tk.admin_reply)}</div>` : ''}
+              <button type="button" onclick="replySupportTicket('${tk.id}')" class="px-3 py-1 rounded-xl bg-slate-900 text-white text-[10px] font-bold">Javob yozish</button>
+            </div>`).join('')
+        : `<div class="text-xs text-slate-400 text-center py-6">Murojaatlar yo‘q.</div>`;
+    }
+
+    async function replySupportTicket(id) {
+      if (!hasAdminPerm('tickets')) return;
+      const reply = prompt("Javob matni:"); if (!reply) return;
+      await sb.from('support_tickets').update({ status: 'resolved', admin_reply: reply }).eq('id', id);
+      await logAdminAudit('REPLY_TICKET', id);
+      await refreshAdminData();
+    }
+
+    async function publishGlobalAnnouncement() {
+      if (!hasAdminPerm('announce')) return;
+      const msg = document.getElementById('globalAnnouncementInput').value.trim(); if (!msg) return;
+      await sb.from('system_announcements').insert({ id: 'ann_' + Date.now(), message: msg, is_active: true, created_by: currentUser.email, created_at: new Date().toISOString() });
+      await logAdminAudit('PUBLISH_ANNOUNCEMENT', msg.slice(0, 50));
+      document.getElementById('globalAnnouncementInput').value = '';
+      showToast("E’lon chop etildi!", "📢");
+    }
+
+    function renderAdminAuditList() {
+      const box = document.getElementById('adminAuditList');
+      box.innerHTML = adminAuditLogs.length
+        ? adminAuditLogs.map(l => `<div class="bg-white p-3 rounded-xl border border-slate-200 text-[11px]"><div class="flex justify-between font-bold"><span>${escapeHtml(l.action)}</span><span class="text-slate-400">${formatShortTime(l.created_at)}</span></div><div class="text-slate-500">${escapeHtml(l.actor_email)} → ${escapeHtml(l.target_info)}</div></div>`).join('')
+        : `<div class="text-xs text-slate-400 text-center py-6">Audit yozuvlari yo‘q.</div>`;
+    }
+
+    // ==================== NAVIGATION ====================
+    function switchTab(tabName) {
+      ['home', 'gallery', 'music', 'chat', 'games', 'distance'].forEach(tb => {
+        document.getElementById(`tab-${tb}`).classList.add('hidden');
+        const btn = document.getElementById(`nav-${tb}`);
+        btn.classList.remove('text-sky-600', 'font-extrabold');
+        btn.classList.add('text-slate-400', 'font-semibold');
+      });
+      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+      const active = document.getElementById(`nav-${tabName}`);
+      active.classList.remove('text-slate-400', 'font-semibold');
+      active.classList.add('text-sky-600', 'font-extrabold');
+    }
+
+    function openProfileModal() {
+      renderAllUI();
+      openFlexModal('profileModal');
+    }
+
+    // ==================== INIT ====================
+    window.addEventListener('DOMContentLoaded', async () => {
+      setLanguage(currentLang);
+      const savedId = localStorage.getItem('jm_session_user_id');
+      if (savedId) {
+        const { data: user } = await sb
+          .from('app_users')
+          .select('id, first_name, last_name, email, username, invite_code, partner_id, space_key, role, admin_permissions, is_banned, ban_reason, telegram_id, phone_verified, phone_masked, archive_pin_hash, archives')
+          .eq('id', savedId)
+          .maybeSingle();
+        if (user && !user.is_banned) {
+          await bootUserSession(user);
+          return;
+        }
+      }
+      document.getElementById('authScreen').classList.remove('hidden');
+    });
+  </script>
+</body>
+</html>
